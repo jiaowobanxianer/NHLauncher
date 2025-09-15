@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:NHLauncher.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:DataType="vm:FadeBGViewModel"
+             x:Class="NHLauncher.Views.FadeBG"
+			 Background="{Binding ImageFromBinding}">
+
+	<Design.DataContext>
+		<vm:FadeBGViewModel/>
+	</Design.DataContext>
+	<Grid>
+
+		<Border CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=UserControl}}" PointerPressed="Border_PointerPressed" 
+				Background="Transparent" ClipToBounds="True">
+				<Image Source="{Binding ImageFromBinding}" Stretch="UniformToFill"/>
+		</Border>
+		<ContentPresenter Content="{Binding Content, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+	</Grid>
+</UserControl>
