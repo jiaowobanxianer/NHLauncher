@@ -31,11 +31,9 @@
   <ItemGroup>
     <Reference Include="LauncherHotupdate">
       <HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\LauncherHotupdate.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
 
