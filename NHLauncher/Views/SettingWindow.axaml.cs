@@ -14,6 +14,8 @@ namespace NHLauncher
         public SettingWindow()
         {
             InitializeComponent();
+            setting = SettingHelper.LoadOrCreateSetting();
+            ViewModel = new SettingViewModel(setting);
         }
         public SettingWindow(LauncherSetting settings)
         {
