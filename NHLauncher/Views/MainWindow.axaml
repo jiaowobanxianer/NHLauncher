@@ -5,15 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:NHLauncher.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
-		Width="560" Height="400"
+		Width="660" Height="400"
         x:Class="NHLauncher.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="NHLauncher"
 	    WindowStartupLocation="CenterScreen"
 		TransparencyLevelHint="AcrylicBlur"
 		Background="Transparent"
+		CornerRadius="10"
+		ClipToBounds="True"
 		ExtendClientAreaChromeHints="NoChrome"
-		ExtendClientAreaToDecorationsHint="True"
-		>
-	<views:MainView />
+		ExtendClientAreaToDecorationsHint="True">
+	<Border CornerRadius="10" Background="Transparent" ClipToBounds="True">
+		<views:MainView />
+	</Border>
 </Window>

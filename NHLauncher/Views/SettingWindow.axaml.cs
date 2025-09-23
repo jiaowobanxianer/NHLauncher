@@ -30,13 +30,6 @@ namespace NHLauncher
             DataContext = ViewModel;
         }
 
-        private void Border_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            {
-                BeginMoveDrag(e);
-            }
-        }
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
@@ -59,7 +52,7 @@ namespace NHLauncher
             ViewModel.AppName = setting.AppName;
             ViewModel.ServerBaseUrl = setting.ServerBaseUrl;
 
-            Close(null); // 取消
+            Close(ViewModel); // 取消
         }
     }
 }

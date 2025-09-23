@@ -1,9 +1,10 @@
-﻿using Avalonia.Media.Imaging;
+﻿    using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LauncherHotupdate.Core;
 using NHLauncher.Other;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,15 +18,12 @@ public partial class MainViewModel : ViewModelBase
     private List<Bitmap> images = new();
     private int currentIdx = 0;
     [ObservableProperty]
-    public Bitmap? imageFromBinding;
-    [ObservableProperty]
     public int downloadProgress;
     [ObservableProperty]
     public bool downloading;
     [ObservableProperty]
     public bool canUpdate;
-    [ObservableProperty]
-    public List<string> logMessages = new List<string>();
+    public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
     private LauncherSetting _setting;
     public event Action<string>? OnError;
     public event Action? OnUpdate;
@@ -33,50 +31,14 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         _setting = SettingHelper.LoadOrCreateSetting();
-        // 假设图片文件名是连续的，动态生成路径
-        var imageUris = GenerateImageUris("avares://NHLauncher/Assets/LoginBG/", "合成 1_", 4, 237, ".png");
-
-        // 加载所有图片
-        foreach (var uri in imageUris)
-        {
-            var bitmap = ImageHelper.LoadFromResource(uri);
-            if (bitmap != null)
-            {
-                images.Add(bitmap);
-            }
-        }
-        ImageFromBinding = images[currentIdx];
         ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.jpg"));
         OnError += (msg) => LogMessages.Add(msg);
     }
     public MainViewModel(LauncherSetting setting)
     {
         _setting = setting;
-        // 假设图片文件名是连续的，动态生成路径
-        var imageUris = GenerateImageUris("avares://NHLauncher/Assets/LoginBG/", "合成 1_", 4, 237, ".png");
-
-        // 加载所有图片
-        foreach (var uri in imageUris)
-        {
-            var bitmap = ImageHelper.LoadFromResource(uri);
-            if (bitmap != null)
-            {
-                images.Add(bitmap);
-            }
-        }
-        ImageFromBinding = images[currentIdx];
         ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.jpg"));
         OnError += (msg) => LogMessages.Add(msg);
-    }
-    public void NextIMG()
-    {
-        if (currentIdx < images.Count - 1)
-        {
-            currentIdx++;
-        }
-        else
-            currentIdx = 0;
-        ImageFromBinding = images[currentIdx];
     }
     public void StartCommand()
     {
@@ -134,16 +96,6 @@ public partial class MainViewModel : ViewModelBase
         {
             OnError?.Invoke(ex.Message);
         }
-    }
-    private List<Uri> GenerateImageUris(string basePath, string prefix, int startIndex, int endIndex, string extension)
-    {
-        var uris = new List<Uri>();
-        for (int i = startIndex; i < endIndex; i++)
-        {
-            var fileName = $"{prefix}{i:D5}{extension}";
-            uris.Add(new Uri($"{basePath}{fileName}"));
-        }
-        return uris;
     }
     public class ProgressReport : IProgress<double>
     {

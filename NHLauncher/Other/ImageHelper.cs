@@ -11,29 +11,41 @@ using Avalonia.Platform;
 namespace NHLauncher.Other
 {
 
-        public static class ImageHelper
+    public static class ImageHelper
+    {
+        public static string projectResourcePath = "avares://NHLauncher/Assets";
+        public static Bitmap LoadFromResource(Uri resourceUri)
         {
-            public static Bitmap LoadFromResource(Uri resourceUri)
+            return new Bitmap(AssetLoader.Open(resourceUri));
+        }
+        public static Bitmap LoadFromResource(string resourcePath)
+        {
+            return LoadFromResource(new Uri(Path.Combine(projectResourcePath, resourcePath)));
+        }
+        public static Stream LoadAssetStreamFromResource(Uri resourceUri)
+        {
+            return AssetLoader.Open(resourceUri);
+        }
+        public static Stream LoadAssetStreamFromResource(string resourcePath)
+        {
+            return LoadAssetStreamFromResource(new Uri(Path.Combine(projectResourcePath, resourcePath)));
+        }
+        public static async Task<Bitmap?> LoadFromWeb(Uri url)
+        {
+            using var httpClient = new HttpClient();
+            try
             {
-                return new Bitmap(AssetLoader.Open(resourceUri));
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                var data = await response.Content.ReadAsByteArrayAsync();
+                return new Bitmap(new MemoryStream(data));
             }
-
-            public static async Task<Bitmap?> LoadFromWeb(Uri url)
+            catch (HttpRequestException ex)
             {
-                using var httpClient = new HttpClient();
-                try
-                {
-                    var response = await httpClient.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
-                    var data = await response.Content.ReadAsByteArrayAsync();
-                    return new Bitmap(new MemoryStream(data));
-                }
-                catch (HttpRequestException ex)
-                {
-                    Console.WriteLine($"An error occurred while downloading image '{url}' : {ex.Message}");
-                    return null;
-                }
+                Console.WriteLine($"An error occurred while downloading image '{url}' : {ex.Message}");
+                return null;
             }
         }
-    
+    }
+
 }

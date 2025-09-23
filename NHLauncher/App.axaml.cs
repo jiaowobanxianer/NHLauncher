@@ -14,6 +14,7 @@ namespace NHLauncher;
 
 public partial class App : Application
 {
+    private bool _isTrayIconInitialized = false;
     private TrayIcon? _trayIcon;
     public override void Initialize()
     {
@@ -29,37 +30,7 @@ public partial class App : Application
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow();
-            _trayIcon = new TrayIcon
-            {
-                Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://NHLauncher/Assets/avalonia-logo.ico"))), // 路径要确认
-                ToolTipText = "NHLauncher",
-                IsVisible = true,
-            };
-            var menu = new NativeMenu();
-
-            var showItem = new NativeMenuItem("Show");
-            showItem.Click += (sender, args) =>
-            {
-                desktop.MainWindow?.Show();
-                desktop.MainWindow?.Activate();
-            };
-            menu.Items.Add(showItem);
-
-            var exitItem = new NativeMenuItem("Exit");
-            exitItem.Click += (sender, args) =>
-            {
-                desktop.Shutdown();
-            };
-            menu.Items.Add(exitItem);
-
-            _trayIcon.Menu = menu;
-
-            // 可选：支持单击托盘图标（注意 macOS 上可能不触发 Clicked）
-            _trayIcon.Clicked += (s, e) =>
-            {
-                desktop.MainWindow?.Show();
-                desktop.MainWindow?.Activate();
-            };
+            InitializeTrayIcon(desktop);
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
@@ -67,6 +38,43 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void InitializeTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        if (_isTrayIconInitialized) return; // 防止重复初始化
+        _trayIcon = new TrayIcon
+        {
+            Icon = new WindowIcon(ImageHelper.LoadAssetStreamFromResource("avalonia-logo.ico")), // 路径要确认
+            ToolTipText = "NHLauncher",
+            IsVisible = true,
+        };
+        var menu = new NativeMenu();
+
+        var showItem = new NativeMenuItem("Show");
+        showItem.Click += (sender, args) =>
+        {
+            desktop.MainWindow?.Show();
+            desktop.MainWindow?.Activate();
+        };
+        menu.Items.Add(showItem);
+
+        var exitItem = new NativeMenuItem("Exit");
+        exitItem.Click += (sender, args) =>
+        {
+            desktop.Shutdown();
+        };
+        menu.Items.Add(exitItem);
+
+        _trayIcon.Menu = menu;
+
+        // 可选：支持单击托盘图标（注意 macOS 上可能不触发 Clicked）
+        _trayIcon.Clicked += (s, e) =>
+        {
+            desktop.MainWindow?.Show();
+            desktop.MainWindow?.Activate();
+        };
+        _isTrayIconInitialized = true;
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

@@ -3,87 +3,88 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:NHLauncher.ViewModels"
+			 xmlns:views="clr-namespace:NHLauncher.Views"
              mc:Ignorable="d"
              x:Class="NHLauncher.Views.MainView"
              x:DataType="vm:MainViewModel"
+			 Background="Transparent"
+			 CornerRadius="10"
+			 ClipToBounds="True"
              d:DesignWidth="560" d:DesignHeight="400">
 
 	<Design.DataContext>
 		<vm:MainViewModel/>
 	</Design.DataContext>
 
-	<Grid>
-		<!-- 背景 -->
-		<Border PointerPressed="Border_PointerPressed" CornerRadius="10" Name="BackgroundBorder"
-                Background="Transparent" ClipToBounds="True">
-			<Image Source="{Binding ImageFromBinding}" Stretch="UniformToFill"/>
-		</Border>
+	<views:DragableBorder>
+		<Grid>
+			<views:FadeBG CornerRadius="10" ClipToBounds="True"/>
+			<!-- 标题栏右侧按钮 -->
+			<StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,5,5,0">
+				<Button Background="Transparent" Name="BTN_Set" Click="BTN_Set_Click">
+					<TextBlock Text="⚙" FontSize="14"/>
+				</Button>
+				<Button Background="Transparent" Name="BTN_Close" Click="BTN_Close_Click">
+					<TextBlock Text="✖" FontSize="14"/>
+				</Button>
+			</StackPanel>
 
-		<!-- 标题栏右侧按钮 -->
-		<StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,5,5,0">
-			<Button Background="Transparent" Name="BTN_Set" Click="BTN_Set_Click">
-				<TextBlock Text="⚙" FontSize="14"/>
-			</Button>
-			<Button Background="Transparent" Name="BTN_Close" Click="BTN_Close_Click">
-				<TextBlock Text="✖" FontSize="14"/>
-			</Button>
-		</StackPanel>
+			<!-- 主体内容 -->
+			<Grid Margin="20,50,20,20">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="100"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="100"/>
+				</Grid.RowDefinitions>
 
-		<!-- 主体内容 -->
-		<Grid Margin="20,50,20,20">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="100"/>
-				<RowDefinition Height="*"/>
-				<RowDefinition Height="100"/>
-			</Grid.RowDefinitions>
+				<!-- 顶部头像和标题 -->
+				<Grid Grid.Row="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
 
-			<!-- 顶部头像和标题 -->
-			<Grid Grid.Row="0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="100"/>
-					<ColumnDefinition Width="*"/>
-				</Grid.ColumnDefinitions>
+					<Border Grid.Column="0" Width="80" Height="80" BorderBrush="White" BorderThickness="2" CornerRadius="40" HorizontalAlignment="Left" VerticalAlignment="Center">
+						<Ellipse Width="76" Height="76">
+							<Ellipse.Fill>
+								<ImageBrush Source="{Binding ImgAvatar}" Stretch="UniformToFill"/>
+							</Ellipse.Fill>
+						</Ellipse>
+					</Border>
 
-				<Border Grid.Column="0" Width="80" Height="80" BorderBrush="White" BorderThickness="2" CornerRadius="40" HorizontalAlignment="Left" VerticalAlignment="Center">
-					<Ellipse Width="76" Height="76">
-						<Ellipse.Fill>
-							<ImageBrush Source="{Binding ImgAvatar}" Stretch="UniformToFill"/>
-						</Ellipse.Fill>
-					</Ellipse>
-				</Border>
+					<TextBlock Grid.Column="1" Text="NH Launcher" FontSize="48" FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+				</Grid>
+				<Grid Grid.Row="1" Margin="40,20,40,20">
+					<Border CornerRadius="5"  Background="#50505000">
+						<ListBox Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
+					</Border>
+				</Grid>
+				<!-- 底部操作区域（只保留下载/启动） -->
+				<Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,25">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<!-- 进度条 -->
+						<ColumnDefinition Width="Auto"/>
+						<!-- 按钮 -->
+					</Grid.ColumnDefinitions>
 
-				<TextBlock Grid.Column="1" Text="NH Launcher" FontSize="48" FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+					<!-- 下载进度条 -->
+					<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center" IsVisible="{Binding Downloading}"/>
+
+					<!-- 启动按钮 -->
+					<StackPanel  Grid.Column="1" Orientation="Vertical"  Margin="50,0,0,0" HorizontalAlignment="Center">
+						<Button  Width="120" Height="60"  Command="{Binding StartCommand}" IsVisible="{Binding !CanUpdate}" Background="Beige" CornerRadius="5">
+							<TextBlock Text="启动" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Button>
+
+						<!-- 更新按钮 -->
+						<Button  Width="120" Height="60" Command="{Binding UpdateCommand}" IsVisible="{Binding CanUpdate}">
+							<TextBlock Text="更新" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Button>
+						<Button  Foreground="#2D77E5" HorizontalAlignment="Center"  Background="Transparent" Command="{Binding CheckUpdate}" CornerRadius="5">检查更新</Button>
+					</StackPanel>
+				</Grid>
 			</Grid>
-			<Grid Grid.Row="1" Margin="40,20,40,20" Background="#50505000">
-				<ListBox Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}">
-
-				</ListBox>
-			</Grid>
-			<!-- 底部操作区域（只保留下载/启动） -->
-			<Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,25">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*"/>
-					<!-- 进度条 -->
-					<ColumnDefinition Width="Auto"/>
-					<!-- 按钮 -->
-				</Grid.ColumnDefinitions>
-
-				<!-- 下载进度条 -->
-				<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center" IsVisible="{Binding Downloading}"/>
-
-				<!-- 启动按钮 -->
-				<StackPanel  Grid.Column="1" Orientation="Vertical"  Margin="50,0,0,0" HorizontalAlignment="Center">
-					<Button  Width="120" Height="60"  Command="{Binding StartCommand}" IsVisible="{Binding !CanUpdate}" Background="Beige">
-						<TextBlock Text="启动" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-					</Button>
-
-					<!-- 更新按钮 -->
-					<Button  Width="120" Height="60" Command="{Binding UpdateCommand}" IsVisible="{Binding CanUpdate}">
-						<TextBlock Text="更新" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-					</Button>
-					<Button  Foreground="#2D77E5" HorizontalAlignment="Center"  Background="Transparent" Command="{Binding CheckUpdate}">检查更新</Button>
-				</StackPanel>
-			</Grid>
-		</Grid>
 	</Grid>
+	</views:DragableBorder>
 </UserControl>

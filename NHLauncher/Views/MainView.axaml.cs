@@ -10,19 +10,11 @@ namespace NHLauncher.Views;
 
 public partial class MainView : UserControl
 {
-    private readonly DispatcherTimer _timer;
     private SettingWindow? currrentSettingWindow = null;
     private LauncherSetting setting;
     public MainView()
     {
         InitializeComponent();
-        // 初始化定时器
-        _timer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(30) // 每30毫秒秒切换一次
-        };
-        _timer.Tick += OnTimerTick;
-        _timer.Start();
         setting = SettingHelper.LoadOrCreateSetting();
         var vm = new MainViewModel(setting);
         vm.OnError += async (msg) =>
@@ -34,7 +26,7 @@ public partial class MainView : UserControl
         vm.OnStart += () =>
         {
             //隐藏到系统托盘
-            (this.Parent as Window)?.Hide();
+            this.GetWindow()?.Hide();
         };
         vm.OnUpdate += () =>
         {
@@ -42,23 +34,9 @@ public partial class MainView : UserControl
         };
         DataContext = vm;
     }
-
-    private void OnTimerTick(object? sender, EventArgs e)
-    {
-        var d = DataContext as MainViewModel;
-        d?.NextIMG();
-    }
-    private void Border_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-    {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-        {
-            (this.Parent as Window)?.BeginMoveDrag(e);
-        }
-    }
-
     private void BTN_Close_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        (this.Parent as Window)?.Close();
+        this.GetWindow()?.Close();
     }
     private void BTN_Set_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
