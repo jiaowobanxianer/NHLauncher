@@ -1,758 +1,760 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-	  <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="Assets\avalonia-logo.ico" />
-    <None Remove="Dependancies\LauncherHotupdate.dll" />
-    <None Remove="Dependancies\Newtonsoft.Json.dll" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Content Include="Dependancies\LauncherHotupdate.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Dependancies\Newtonsoft.Json.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Themes.Fluent" />
-    <PackageReference Include="Avalonia.Fonts.Inter" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics">
-      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="MessageBox.Avalonia" />
-  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="LauncherHotupdate">
-      <HintPath>Dependancies\LauncherHotupdate.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Dependancies\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Assets\avalonia-logo.ico" />
+		<None Remove="Dependancies\LauncherHotupdate.dll" />
+		<None Remove="Dependancies\Newtonsoft.Json.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Assets\avalonia-logo.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Dependancies\LauncherHotupdate.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
+		<Content Include="Dependancies\Newtonsoft.Json.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00004.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00005.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00006.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00007.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00008.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00009.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00010.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00011.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00012.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00013.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00014.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00015.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00016.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00017.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00018.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00019.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00020.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00021.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00022.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00023.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00024.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00025.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00026.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00027.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00028.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00029.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00030.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00031.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00032.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00033.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00034.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00035.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00036.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00037.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00038.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00039.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00040.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00041.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00042.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00043.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00044.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00045.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00046.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00047.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00048.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00049.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00050.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00051.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00052.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00053.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00054.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00055.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00056.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00057.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00058.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00059.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00060.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00061.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00062.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00063.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00064.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00065.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00066.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00067.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00068.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00069.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00070.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00071.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00072.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00073.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00074.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00075.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00076.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00077.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00078.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00079.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00080.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00081.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00082.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00083.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00084.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00085.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00086.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00087.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00088.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00089.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00090.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00091.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00092.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00093.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00094.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00095.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00096.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00097.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00098.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00099.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00100.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00101.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00102.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00103.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00104.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00105.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00106.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00107.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00108.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00109.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00110.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00111.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00112.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00113.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00114.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00115.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00116.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00117.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00118.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00119.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00120.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00121.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00122.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00123.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00124.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00125.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00126.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00127.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00128.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00129.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00130.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00131.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00132.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00133.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00134.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00135.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00136.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00137.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00138.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00139.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00140.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00141.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00142.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00143.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00144.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00145.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00146.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00147.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00148.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00149.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00150.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00151.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00152.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00153.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00154.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00155.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00156.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00157.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00158.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00159.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00160.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00161.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00162.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00163.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00164.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00165.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00166.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00167.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00168.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00169.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00170.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00171.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00172.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00173.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00174.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00175.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00176.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00177.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00178.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00179.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00180.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00181.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00182.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00183.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00184.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00185.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00186.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00187.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00188.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00189.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00190.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00191.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00192.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00193.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00194.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00195.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00196.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00197.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00198.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00199.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00200.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00201.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00202.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00203.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00204.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00205.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00206.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00207.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00208.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00209.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00210.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00211.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00212.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00213.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00214.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00215.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00216.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00217.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00218.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00219.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00220.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00221.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00222.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00223.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00224.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00225.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00226.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00227.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00228.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00229.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00230.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00231.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00232.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00233.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00234.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00235.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\LoginBG\合成 1_00236.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Avalonia" />
+		<PackageReference Include="Avalonia.Themes.Fluent" />
+		<PackageReference Include="Avalonia.Fonts.Inter" />
+		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+		<PackageReference Include="Avalonia.Diagnostics">
+			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="MessageBox.Avalonia" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="LauncherHotupdate">
+			<HintPath>Dependancies\LauncherHotupdate.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>Dependancies\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Assets\avalonia-logo.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00004.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00005.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00006.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00007.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00008.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00009.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00010.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00011.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00012.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00013.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00014.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00015.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00016.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00017.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00018.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00019.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00020.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00021.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00022.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00023.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00024.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00025.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00026.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00027.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00028.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00029.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00030.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00031.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00032.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00033.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00034.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00035.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00036.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00037.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00038.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00039.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00040.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00041.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00042.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00043.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00044.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00045.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00046.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00047.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00048.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00049.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00050.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00051.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00052.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00053.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00054.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00055.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00056.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00057.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00058.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00059.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00060.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00061.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00062.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00063.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00064.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00065.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00066.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00067.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00068.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00069.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00070.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00071.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00072.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00073.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00074.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00075.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00076.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00077.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00078.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00079.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00080.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00081.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00082.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00083.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00084.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00085.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00086.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00087.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00088.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00089.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00090.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00091.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00092.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00093.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00094.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00095.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00096.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00097.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00098.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00099.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00100.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00101.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00102.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00103.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00104.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00105.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00106.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00107.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00108.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00109.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00110.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00111.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00112.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00113.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00114.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00115.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00116.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00117.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00118.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00119.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00120.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00121.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00122.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00123.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00124.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00125.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00126.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00127.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00128.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00129.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00130.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00131.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00132.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00133.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00134.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00135.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00136.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00137.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00138.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00139.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00140.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00141.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00142.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00143.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00144.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00145.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00146.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00147.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00148.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00149.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00150.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00151.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00152.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00153.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00154.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00155.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00156.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00157.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00158.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00159.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00160.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00161.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00162.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00163.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00164.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00165.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00166.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00167.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00168.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00169.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00170.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00171.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00172.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00173.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00174.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00175.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00176.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00177.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00178.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00179.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00180.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00181.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00182.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00183.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00184.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00185.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00186.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00187.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00188.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00189.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00190.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00191.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00192.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00193.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00194.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00195.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00196.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00197.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00198.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00199.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00200.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00201.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00202.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00203.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00204.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00205.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00206.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00207.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00208.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00209.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00210.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00211.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00212.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00213.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00214.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00215.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00216.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00217.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00218.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00219.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00220.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00221.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00222.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00223.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00224.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00225.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00226.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00227.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00228.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00229.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00230.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00231.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00232.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00233.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00234.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00235.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00236.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+	</ItemGroup>
 </Project>
