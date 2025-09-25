@@ -15,8 +15,6 @@ public partial class MainViewModel : ViewModelBase
 {
     [ObservableProperty]
     public Bitmap imgAvatar;
-    private List<Bitmap> images = new();
-    private int currentIdx = 0;
     [ObservableProperty]
     public int downloadProgress;
     [ObservableProperty]
