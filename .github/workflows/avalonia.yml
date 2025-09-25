@@ -1,10 +1,9 @@
-name: Avalonia Build
+name: Avalonia Release Build
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+    - "v*" # 例如 v1.0, v1.0.1 触发
 
 jobs:
   build:
@@ -12,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
+        configuration: [ Release ]
 
     steps:
     - name: Checkout
@@ -29,14 +28,15 @@ jobs:
     - name: Build
       run: dotnet build NHLauncher.sln -c ${{ matrix.configuration }}
 
-    - name: Test
-      run: dotnet test NHLauncher.sln -c ${{ matrix.configuration }}
-
     - name: Publish
       run: dotnet publish NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }} -o publish/${{ matrix.configuration }}
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+    - name: Zip build output
+      run: Compress-Archive -Path publish/${{ matrix.configuration }}/* -DestinationPath NHLauncher-${{ github.ref_name }}.zip
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
       with:
-        name: AvaloniaApp-${{ matrix.configuration }}
-        path: publish/${{ matrix.configuration }}
+        files: NHLauncher-${{ github.ref_name }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
