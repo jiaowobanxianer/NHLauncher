@@ -25,13 +25,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\NHLauncher\NHLauncher.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Include="LauncherHotupdate">
-			<HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\LauncherHotupdate.dll</HintPath>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\Newtonsoft.Json.dll</HintPath>
-		</Reference>
-	</ItemGroup>
 </Project>

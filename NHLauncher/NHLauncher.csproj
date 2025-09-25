@@ -17,16 +17,6 @@
 		<None Remove="Dependancies\Newtonsoft.Json.dll" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Include="Dependancies\LauncherHotupdate.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</Content>
-		<Content Include="Dependancies\Newtonsoft.Json.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" />
