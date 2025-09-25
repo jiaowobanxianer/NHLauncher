@@ -13,6 +13,17 @@
   
   <ItemGroup>
     <None Remove="Assets\avalonia-logo.ico" />
+    <None Remove="Dependancies\LauncherHotupdate.dll" />
+    <None Remove="Dependancies\Newtonsoft.Json.dll" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="Dependancies\LauncherHotupdate.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dependancies\Newtonsoft.Json.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
