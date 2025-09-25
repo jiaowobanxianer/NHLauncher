@@ -52,7 +52,7 @@
 						</Ellipse>
 					</Border>
 
-					<TextBlock Grid.Column="1" Text="NH Launcher" FontSize="48" FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+					<TextBlock Grid.Column="1"  Text="{Binding Title}" FontSize="48" FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
 				</Grid>
 				<Grid Grid.Row="1" Margin="40,20,40,20">
 					<Border CornerRadius="5"  Background="#50505000">

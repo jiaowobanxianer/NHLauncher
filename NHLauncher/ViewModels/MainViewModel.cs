@@ -23,6 +23,8 @@ public partial class MainViewModel : ViewModelBase
     public bool downloading;
     [ObservableProperty]
     public bool canUpdate;
+    [ObservableProperty]
+    public string title = "NHLauncher";
     public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
     private LauncherSetting _setting;
     public event Action<string>? OnError;
@@ -37,6 +39,7 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel(LauncherSetting setting)
     {
         _setting = setting;
+        title = _setting.ProjectId;
         ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.jpg"));
         OnError += (msg) => LogMessages.Add(msg);
     }
