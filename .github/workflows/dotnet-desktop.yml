@@ -102,7 +102,11 @@ jobs:
         Appx_Bundle_Platforms: x86|x64
         Appx_Package_Build_Mode: StoreUpload
         Configuration: ${{ matrix.configuration }}
-
+    # 在 Create the app package 之后添加
+    - name: Publish the application
+      run: dotnet publish $env:Wap_Project_Path -c $env:Configuration -o ${{ env.Wap_Project_Directory }}\bin\${{ matrix.configuration }}\publish
+      env:
+        Configuration: ${{ matrix.configuration }}
     # Remove the pfx
     - name: Remove the pfx
       run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
@@ -111,5 +115,13 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: MSIX Package
-        path: ${{ env.Wap_Project_Directory }}\AppPackages
+        name: Build Output - ${{ matrix.configuration }}
+        path: |
+          # 匹配主项目输出的可执行文件和相关依赖
+          ${{ env.Wap_Project_Directory }}\bin\${{ matrix.configuration }}\net8.0\publish\*.exe
+          ${{ env.Wap_Project_Directory }}\bin\${{ matrix.configuration }}\net8.0\publish\*.dll
+          ${{ env.Wap_Project_Directory }}\bin\${{ matrix.configuration }}\net8.0\publish\*.config
+          # 匹配可能生成的打包文件（如果启用了 PublishSingleFile）
+          ${{ env.Wap_Project_Directory }}\bin\${{ matrix.configuration }}\net8.0\publish\*
+          # 保留原路径作为补充（如果存在）
+          ${{ env.Wap_Project_Directory }}\AppPackages\*
