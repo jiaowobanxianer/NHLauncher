@@ -30,10 +30,10 @@
 
   <ItemGroup>
     <Reference Include="LauncherHotupdate">
-      <HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\LauncherHotupdate.dll</HintPath>
+      <HintPath>Dependancies\LauncherHotupdate.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\LauncherHotupdate\bin\Release\netstandard2.1\publish\Newtonsoft.Json.dll</HintPath>
+      <HintPath>Dependancies\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
 
