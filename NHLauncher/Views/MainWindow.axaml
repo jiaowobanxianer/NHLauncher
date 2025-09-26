@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
 		Width="660" Height="400"
         x:Class="NHLauncher.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/xrf.ico"
         Title="NHLauncher"
 	    WindowStartupLocation="CenterScreen"
 		TransparencyLevelHint="AcrylicBlur"

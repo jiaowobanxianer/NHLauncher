@@ -41,12 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="Assets\avalonia-logo.ico">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-	</ItemGroup>
-
-	<ItemGroup>
 		<AvaloniaResource Update="Assets\LoginBG\合成 1_00004.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</AvaloniaResource>
@@ -746,5 +740,9 @@
 		<AvaloniaResource Update="Assets\LoginBG\合成 1_00236.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</AvaloniaResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AvaloniaResource Remove="Assets\avalonia-logo.ico" />
 	</ItemGroup>
 </Project>
