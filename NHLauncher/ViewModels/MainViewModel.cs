@@ -31,14 +31,14 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         _setting = SettingHelper.LoadOrCreateSetting();
-        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.jpg"));
+        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.png"));
         OnError += (msg) => LogMessages.Add(msg);
     }
     public MainViewModel(LauncherSetting setting)
     {
         _setting = setting;
         title = _setting.ProjectId;
-        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.jpg"));
+        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.png"));
         OnError += (msg) => LogMessages.Add(msg);
     }
     public void StartCommand()

@@ -45,7 +45,7 @@ public partial class App : Application
         if (_isTrayIconInitialized) return; // 防止重复初始化
         _trayIcon = new TrayIcon
         {
-            Icon = new WindowIcon(ImageHelper.LoadAssetStreamFromResource("avalonia-logo.ico")), // 路径要确认
+            Icon = new WindowIcon(ImageHelper.LoadAssetStreamFromResource("xrf.ico")), // 路径要确认
             ToolTipText = "NHLauncher",
             IsVisible = true,
         };
