@@ -49,7 +49,8 @@ public partial class MainViewModel : ViewModelBase
             {
                 FileName = Path.Combine(_setting.LocalPath, _setting.AppName),
                 WorkingDirectory = AppContext.BaseDirectory,
-                UseShellExecute = true
+                UseShellExecute = true,
+                Verb = "runas"
             });
             OnStart?.Invoke();
         }
