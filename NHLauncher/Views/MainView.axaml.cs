@@ -5,13 +5,14 @@ using NHLauncher.Other;
 using NHLauncher.ViewModels;
 using System;
 using MsBox.Avalonia;
+using System.Collections.Generic;
 using MsBox.Avalonia.Enums;
 namespace NHLauncher.Views;
 
 public partial class MainView : UserControl
 {
     private SettingWindow? currrentSettingWindow = null;
-    private LauncherSetting setting;
+    private List<LauncherSetting> setting;
     public MainView()
     {
         InitializeComponent();
@@ -40,17 +41,17 @@ public partial class MainView : UserControl
     }
     private void BTN_Set_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (currrentSettingWindow != null && currrentSettingWindow.IsVisible)
-        {
-            currrentSettingWindow.Activate();
-            return;
-        }
-        else
-        {
-            currrentSettingWindow = new SettingWindow(setting);
-            currrentSettingWindow.Closed += (s, e) => currrentSettingWindow = null;
-            currrentSettingWindow.Show();
-        }
+        //if (currrentSettingWindow != null && currrentSettingWindow.IsVisible)
+        //{
+        //    currrentSettingWindow.Activate();
+        //    return;
+        //}
+        //else
+        //{
+        //    currrentSettingWindow = new SettingWindow(Setting);
+        //    currrentSettingWindow.Closed += (s, e) => currrentSettingWindow = null;
+        //    currrentSettingWindow.Show();
+        //}
     }
     private void Hyperlink_PointerPressed1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
