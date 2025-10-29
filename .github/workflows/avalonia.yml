@@ -22,7 +22,10 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.0.x
+      env:
+        DOTNET_NOLOGO: true
+        DOTNET_ROLL_FORWARD: Disable
 
     - name: Restore
       run: dotnet restore NHLauncher.sln
