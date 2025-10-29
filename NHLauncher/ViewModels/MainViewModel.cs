@@ -1,4 +1,4 @@
-﻿    using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LauncherHotupdate.Core;
 using NHLauncher.Other;
@@ -85,6 +85,7 @@ public partial class MainViewModel : ViewModelBase
         {
             LauncherUpdater updater = new LauncherUpdater(_setting);
             CanUpdate = await updater.HasUpdateAsync();
+
             if (CanUpdate)
             {
                 LogMessages.Add("检测到新版本，点击更新按钮进行更新。");

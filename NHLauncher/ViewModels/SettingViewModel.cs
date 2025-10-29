@@ -69,9 +69,19 @@ namespace NHLauncher.ViewModels
                 }
             }
         }
-
+        public string API
+        {
+            get => _setting.ServerBaseUrl;
+            set
+            {
+                if (_setting.ServerBaseUrl != value)
+                {
+                    _setting.ServerBaseUrl = value;
+                    OnPropertyChanged(nameof(API));
+                }
+            }
+        }
         public string LocalPath => _setting.LocalPath;
-        public string RemoteUrl => _setting.RemoteUrl;
         public string ManifestFile => _setting.ManifestFile;
 
         public LauncherSetting GetUnderlyingSetting() => _setting;

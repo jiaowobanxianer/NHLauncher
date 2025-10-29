@@ -71,8 +71,8 @@ public partial class App : Application
         // 可选：支持单击托盘图标（注意 macOS 上可能不触发 Clicked）
         _trayIcon.Clicked += (s, e) =>
         {
-            desktop.MainWindow?.Show();
-            desktop.MainWindow?.Activate();
+            desktop?.MainWindow?.Show();
+            desktop?.MainWindow?.Activate();
         };
         _isTrayIconInitialized = true;
     }
