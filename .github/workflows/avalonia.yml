@@ -1,9 +1,9 @@
-name: Avalonia Release Build
+name: Avalonia Desktop Release Build
 
 on:
   push:
     tags:
-    - "v*" # 例如 v1.0, v1.0.1 触发
+      - "v*" # 例如 v1.0 或 v1.0.1 时触发
 
 jobs:
   build:
@@ -19,27 +19,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup .NET
+    - name: Setup .NET 8
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
-      env:
-        DOTNET_NOLOGO: true
-        DOTNET_ROLL_FORWARD: Disable
+        dotnet-version: 8.0.x
 
-    - name: Restore
-      run: dotnet restore NHLauncher.sln
+    - name: Restore (Desktop only)
+      run: dotnet restore NHLauncher.Desktop/NHLauncher.Desktop.csproj
 
-    - name: Build
-      run: dotnet build NHLauncher.sln -c ${{ matrix.configuration }}
+    - name: Build (Desktop only)
+      run: dotnet build NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }}
 
-    - name: Publish
+    - name: Publish (self-contained Win-x64)
       run: dotnet publish NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }} -o publish/${{ matrix.configuration }} -r win-x64 --self-contained true
 
     - name: Zip build output
       run: Compress-Archive -Path publish/${{ matrix.configuration }}/* -DestinationPath NHLauncher-${{ github.ref_name }}.zip
 
-    - name: Create Release
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         files: NHLauncher-${{ github.ref_name }}.zip
