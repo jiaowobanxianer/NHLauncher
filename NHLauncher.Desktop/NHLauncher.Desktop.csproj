@@ -10,7 +10,12 @@
 
 	<PropertyGroup>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationIcon>xrf.ico</ApplicationIcon>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="xrf.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia.Desktop" />
