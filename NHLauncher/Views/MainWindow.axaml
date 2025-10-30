@@ -15,7 +15,8 @@
 		CornerRadius="10"
 		ClipToBounds="True"
 		ExtendClientAreaChromeHints="NoChrome"
-		ExtendClientAreaToDecorationsHint="True">
+		ExtendClientAreaToDecorationsHint="True"
+			 MinWidth="320" MinHeight="300">
 	<Border CornerRadius="10" Background="Transparent" ClipToBounds="True">
 		<views:MainView />
 	</Border>

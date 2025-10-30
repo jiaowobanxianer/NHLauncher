@@ -171,7 +171,10 @@ public partial class MainViewModel : ViewModelBase
             }
             else
             {
-                LogMessages.Add("当前已是最新版本。");
+                if (await updater.GetRemoteManifestAsync() == null)
+                    LogMessages.Add("当前应用无远程版本，请检查ProjectID是否正确。");
+                else
+                    LogMessages.Add("当前已是最新版本。");
             }
         }
         catch (Exception ex)

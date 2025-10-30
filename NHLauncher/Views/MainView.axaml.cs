@@ -33,6 +33,7 @@ public partial class MainView : UserControl
         {
 
         };
+        vm.LogMessages.CollectionChanged += (e, s) => LogListBox.ScrollIntoView(LogListBox.ItemCount);
         DataContext = vm;
     }
     private void BTN_Close_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

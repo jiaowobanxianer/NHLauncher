@@ -103,13 +103,15 @@
 							</Ellipse>
 						</Border>
 
-						<TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="48" FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+						<Viewbox Grid.Column="1" Margin="10,0,10,0" Stretch="Uniform" MinWidth="100">
+							<TextBlock Text="{Binding Title}" FontSize="48"  FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" />
+						</Viewbox>
 					</Grid>
 
 					<!-- 中间日志 -->
 					<Grid Grid.Row="1" Margin="40,20,40,20">
 						<Border CornerRadius="5" Background="#50505000">
-							<ListBox Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
+							<ListBox x:Name="LogListBox" Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
 						</Border>
 					</Grid>
 
@@ -120,7 +122,8 @@
 							<ColumnDefinition Width="Auto"/>
 						</Grid.ColumnDefinitions>
 
-						<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center" IsVisible="{Binding Downloading}"/>
+						<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center" IsVisible="{Binding Downloading}" ShowProgressText="True">
+						</ProgressBar>
 
 						<StackPanel Grid.Column="1" Orientation="Vertical" Margin="50,0,0,15" HorizontalAlignment="Center">
 							<Button Width="120" Height="60" Command="{Binding StartCommand}" IsVisible="{Binding !CanUpdate}" Background="Beige" CornerRadius="5">
