@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using NHLauncher.Other;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NHLauncher.ViewModels
 {
@@ -76,7 +77,11 @@ namespace NHLauncher.ViewModels
                 cache.Remove(key);
 
                 // 延迟释放，避免 UI 渲染过程中访问空引用
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => bmp.Dispose(),
+                Avalonia.Threading.Dispatcher.UIThread.Post(async() =>
+                {
+                    await Task.Delay(1000);
+                    bmp?.Dispose();
+                },
                     Avalonia.Threading.DispatcherPriority.Background);
             }
         }
