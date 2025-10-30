@@ -3,11 +3,15 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using NHLauncher.Other;
 namespace NHLauncher.Views;
 
 public partial class DragableBorder : Border
 {
+    object lo = new object(); 
+    private bool _doubleTapLock = false;
     public DragableBorder()
     {
         InitializeComponent();
@@ -25,13 +29,26 @@ public partial class DragableBorder : Border
     }
     private void OnDoubleTapped(object? sender, RoutedEventArgs e)
     {
-        var window = this.GetWindow();
-        if (window == null)
+        if (_doubleTapLock)
             return;
 
-        // 双击切换最大化/正常
-        window.WindowState = window.WindowState == WindowState.Maximized
-            ? WindowState.Normal
-            : WindowState.Maximized;
+        _doubleTapLock = true;
+        // 延迟到 UI 线程执行，确保窗口已完全创建
+        Dispatcher.UIThread.Post(() =>
+        {
+            lock (lo)
+            {
+                if (this.VisualRoot is not Window window)
+                    return;
+
+                window.WindowState = window.WindowState == WindowState.Maximized
+                    ? WindowState.Normal
+                    : WindowState.Maximized;
+
+                e.Handled = true;
+                _doubleTapLock = false;
+            }
+        }, DispatcherPriority.Input);
     }
+
 }
