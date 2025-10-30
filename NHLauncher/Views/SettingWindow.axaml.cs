@@ -25,7 +25,6 @@ namespace NHLauncher
         public SettingWindow(ObservableCollection<LauncherSettingWrapper> settings, MainViewModel vm)
         {
             InitializeComponent();
-            //深拷贝一份设置，防止直接修改原始设置
             this.settings = settings;
             setting = new LauncherSetting();
             _mainViewModel = vm;
@@ -33,10 +32,6 @@ namespace NHLauncher
             DataContext = ViewModel;
         }
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
 
         private void SaveButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {

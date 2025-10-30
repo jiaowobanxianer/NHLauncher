@@ -14,6 +14,16 @@ namespace NHLauncher.Other
     public static class ImageHelper
     {
         public static string projectResourcePath = "avares://NHLauncher/Assets";
+        public static Bitmap? LoadFromFile(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return null;
+            using (var stream = File.OpenRead(filePath))
+            {
+                return new Bitmap(stream);
+            }
+
+        }
         public static Bitmap LoadFromResource(Uri resourceUri)
         {
             return new Bitmap(AssetLoader.Open(resourceUri));

@@ -8,7 +8,9 @@
 		WindowStartupLocation="CenterScreen"
 		Background="Transparent"
 		ExtendClientAreaChromeHints="NoChrome"
-		ExtendClientAreaToDecorationsHint="True">
+		ExtendClientAreaToDecorationsHint="True"
+		TransparencyLevelHint="AcrylicBlur"
+		>
 	<Design.DataContext>
 		<vm:SettingViewModel/>
 	</Design.DataContext>

@@ -10,13 +10,12 @@ namespace NHLauncher.ViewModels
         private LauncherSetting _setting;
 
         public SettingViewModel()
-        {
-            //_setting = SettingHelper.LoadOrCreateSetting(); 
+        { 
             _setting = new LauncherSetting();
         }
         public SettingViewModel(LauncherSetting setting)
         {
-            _setting = setting;  
+            _setting = setting;
         }
         public string ProjectId
         {

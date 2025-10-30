@@ -1,7 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Controls.Shapes;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LauncherHotupdate.Core;
+using Newtonsoft.Json;
 using NHLauncher.Other;
 using System;
 using System.Collections.Generic;
@@ -9,15 +11,16 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.IO.Path;
 namespace NHLauncher.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
     [ObservableProperty]
-    public Bitmap imgAvatar;
+    public Bitmap? imgAvatar;
     [ObservableProperty]
     public int downloadProgress;
     [ObservableProperty]
@@ -27,7 +30,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public bool canUpdate;
     [ObservableProperty]
-    public string title = "NHLauncher";
+    public string? title = "NHLauncher";
     public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
     public ObservableCollection<LauncherSettingWrapper> Settings { get; }
     public event Action<string>? OnError;
@@ -35,22 +38,23 @@ public partial class MainViewModel : ViewModelBase
     public event Action? OnStart;
     public MainViewModel()
     {
-        Settings = new ObservableCollection<LauncherSettingWrapper>(SettingHelper.LoadOrCreateSetting().ConvertAll(x => new LauncherSettingWrapper(SelectSetting, 
+        Settings = new ObservableCollection<LauncherSettingWrapper>(SettingHelper.LoadOrCreateSetting().ConvertAll(x => new LauncherSettingWrapper(SelectSetting,
             DeleteSetting, x)));
-        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.png"));
         OnError += (msg) => LogMessages.Add(msg);
     }
     public MainViewModel(List<LauncherSetting> setting)
     {
-        this.Settings = new ObservableCollection<LauncherSettingWrapper>(setting.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, 
+        this.Settings = new ObservableCollection<LauncherSettingWrapper>(setting.ConvertAll(x => new LauncherSettingWrapper(SelectSetting,
             DeleteSetting, x)));
         if (CurrentSettingIndex < 0 || CurrentSettingIndex >= setting.Count)
         {
             CurrentSettingIndex = 0;
         }
         else
-            title = this.Settings[CurrentSettingIndex].ProjectId;
-        ImgAvatar = ImageHelper.LoadFromResource(new Uri("avares://NHLauncher/Assets/avatar.png"));
+        {
+            Title = this.Settings[CurrentSettingIndex]?.ProjectId;
+            ImgAvatar = Settings[0]?.AppIcon;
+        }
         OnError += (msg) => LogMessages.Add(msg);
     }
     public void SelectSetting(string ProjectID)
@@ -73,11 +77,19 @@ public partial class MainViewModel : ViewModelBase
     {
         Title = Settings[newValue].ProjectId;
         CanUpdate = false;
+        ImgAvatar = Settings[newValue].AppIcon;
     }
     public void AddAppCommand()
     {
-        var window = new SettingWindow(Settings, this);
-        window.Show();
+        try
+        {
+            var window = new SettingWindow(Settings, this);
+            window.Show();
+        }
+        catch (Exception ex)
+        {
+            OnError?.Invoke(ex.Message);
+        }
     }
     public void StartCommand()
     {
@@ -90,7 +102,7 @@ public partial class MainViewModel : ViewModelBase
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = Path.Combine(Settings[CurrentSettingIndex].Setting.LocalPath, Settings[CurrentSettingIndex].Setting.AppName),
+                FileName = Combine(Settings[CurrentSettingIndex].Setting.LocalPath, Settings[CurrentSettingIndex].Setting.AppName),
                 WorkingDirectory = AppContext.BaseDirectory,
                 UseShellExecute = true,
                 Verb = "runas"
@@ -126,6 +138,20 @@ public partial class MainViewModel : ViewModelBase
             OnError?.Invoke(ex.Message);
             Downloading = false;
         }
+    }
+    public void OpenFolder()
+    {
+        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= Settings.Count)
+        {
+            OnError?.Invoke("未选择有效的应用。");
+            return;
+        }
+        //打开文件夹
+        var localPath = Combine(AppContext.BaseDirectory, Settings[CurrentSettingIndex].Setting.LocalPath);
+        if (Directory.Exists(localPath))
+            Process.Start("explorer.exe", localPath);
+        else
+            OnError?.Invoke("应用目录不存在。");
     }
     public async void CheckUpdate()
     {
@@ -176,11 +202,11 @@ public class LauncherSettingWrapper : ObservableObject
     public LauncherSetting Setting { get; set; }
 
     public string ProjectId => Setting.ProjectId;
-
+    public Bitmap? AppIcon => ImageHelper.LoadFromFile(Combine(AppContext.BaseDirectory, Setting.LocalPath, Setting.AppIcon));
     public ICommand SelectCommand { get; }
     public ICommand DeleteCommand { get; }
 
-    public LauncherSettingWrapper(Action<string> selectAction,Action<string> deleteAction, LauncherSetting setting)
+    public LauncherSettingWrapper(Action<string> selectAction, Action<string> deleteAction, LauncherSetting setting)
     {
         Setting = setting;
         SelectCommand = new RelayCommand(() => selectAction?.Invoke(setting.ProjectId));
