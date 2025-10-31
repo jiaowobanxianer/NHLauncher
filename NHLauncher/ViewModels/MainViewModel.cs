@@ -24,6 +24,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public int downloadProgress;
     [ObservableProperty]
+    public string downloadText = "开始下载";
+    [ObservableProperty]
     public int currentSettingIndex;
     [ObservableProperty]
     public bool downloading;
@@ -128,7 +130,7 @@ public partial class MainViewModel : ViewModelBase
             LauncherUpdater updater = new LauncherUpdater(Settings[CurrentSettingIndex].Setting);
             Downloading = true;
             LogMessages.Add("开始下载更新...");
-            await updater.UpdateAsync(new ProgressReport(this));
+            await updater.UpdateAsync(new ProgressReport(this),DownloadCallback);
             Downloading = false;
             LogMessages.Add("更新完成，点击启动按钮启动。");
             CheckUpdate();
@@ -137,6 +139,26 @@ public partial class MainViewModel : ViewModelBase
         {
             OnError?.Invoke(ex.Message);
             Downloading = false;
+            DownloadText = "下载出错，请查看日志将问题发送给管理员！";
+        }
+    }
+    private void DownloadCallback(string commandFile)
+    {
+        var command = commandFile[0];
+        var str = commandFile.Substring(1);
+        switch (command)
+        {
+            case 's':
+                DownloadText = $"已存在{str}，跳过下载。";
+                break;
+            case 'd':
+                DownloadText = $"正在下载{str}...";
+                break;
+            case 'c':
+                DownloadText = $"下载完成！";
+                break;
+            default:
+                break;
         }
     }
     public void OpenFolder()

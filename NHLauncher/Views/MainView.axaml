@@ -121,9 +121,10 @@
 							<ColumnDefinition Width="*"/>
 							<ColumnDefinition Width="Auto"/>
 						</Grid.ColumnDefinitions>
-
-						<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center" IsVisible="{Binding Downloading}" ShowProgressText="True">
-						</ProgressBar>
+						<StackPanel Orientation="Vertical" IsVisible="{Binding Downloading}">
+							<TextBlock Text="{Binding DownloadText}" FontSize="14" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+						<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center"  ShowProgressText="True">
+						</ProgressBar></StackPanel>
 
 						<StackPanel Grid.Column="1" Orientation="Vertical" Margin="50,0,0,15" HorizontalAlignment="Center">
 							<Button Width="120" Height="60" Command="{Binding StartCommand}" IsVisible="{Binding !CanUpdate}" Background="Beige" CornerRadius="5">
