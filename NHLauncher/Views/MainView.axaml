@@ -64,6 +64,8 @@
 												<ContextMenu>
 													<MenuItem Header="删除"
 															  Command="{Binding DeleteCommand}"/>
+													<MenuItem Header="修改"
+															  Command="{Binding ModifyCommand}"/>
 												</ContextMenu>
 											</Button.ContextMenu>
 										</Button>

@@ -1,9 +1,7 @@
-﻿using Avalonia.Controls.Shapes;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LauncherHotupdate.Core;
-using Newtonsoft.Json;
 using NHLauncher.Other;
 using System;
 using System.Collections.Generic;
@@ -11,230 +9,247 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using static System.IO.Path;
-namespace NHLauncher.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+namespace NHLauncher.ViewModels
 {
-    [ObservableProperty]
-    public Bitmap? imgAvatar;
-    [ObservableProperty]
-    public int downloadProgress;
-    [ObservableProperty]
-    public string downloadText = "开始下载";
-    [ObservableProperty]
-    public int currentSettingIndex;
-    [ObservableProperty]
-    public bool downloading;
-    [ObservableProperty]
-    public bool canUpdate;
-    [ObservableProperty]
-    public string? title = "NHLauncher";
-    public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
-    public ObservableCollection<LauncherSettingWrapper> Settings { get; }
-    public event Action<string>? OnError;
-    public event Action? OnUpdate;
-    public event Action? OnStart;
-    public MainViewModel()
+    public partial class MainViewModel : ViewModelBase
     {
-        Settings = new ObservableCollection<LauncherSettingWrapper>(SettingHelper.LoadOrCreateSetting().ConvertAll(x => new LauncherSettingWrapper(SelectSetting,
-            DeleteSetting, x)));
-        OnError += (msg) => LogMessages.Add(msg);
-    }
-    public MainViewModel(List<LauncherSetting> setting)
-    {
-        this.Settings = new ObservableCollection<LauncherSettingWrapper>(setting.ConvertAll(x => new LauncherSettingWrapper(SelectSetting,
-            DeleteSetting, x)));
-        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= setting.Count)
+        [ObservableProperty] private Bitmap? imgAvatar;
+        [ObservableProperty] private int downloadProgress;
+        [ObservableProperty] private string downloadText = "开始下载";
+        [ObservableProperty] private int currentSettingIndex;
+        [ObservableProperty] private bool downloading;
+        [ObservableProperty] private bool canUpdate;
+        [ObservableProperty] private string? title = "NHLauncher";
+
+        public ObservableCollection<string> LogMessages { get; } = new();
+        public ObservableCollection<LauncherSettingWrapper> Settings { get; }
+
+        public event Action<string>? OnError;
+        public event Action? OnUpdate;
+        public event Action? OnStart;
+
+        public MainViewModel()
+            : this(SettingHelper.LoadOrCreateSetting()) { }
+
+        public MainViewModel(List<LauncherSetting> settings)
         {
-            CurrentSettingIndex = 0;
-        }
-        else
-        {
-            Title = this.Settings[CurrentSettingIndex]?.ProjectId;
-            ImgAvatar = Settings[0]?.AppIcon;
-        }
-        OnError += (msg) => LogMessages.Add(msg);
-    }
-    public void SelectSetting(string ProjectID)
-    {
-        if (Settings.Any(x => x.ProjectId == ProjectID))
-        {
-            CurrentSettingIndex = Settings.ToList().FindIndex(x => x.ProjectId == ProjectID);
-        }
-    }
-    public void DeleteSetting(string ProjectID)
-    {
-        if (Settings.Any(x => x.ProjectId == ProjectID))
-        {
-            var index = Settings.ToList().FindIndex(x => x.ProjectId == ProjectID);
-            Settings.RemoveAt(index);
-            SettingHelper.SaveSetting(Settings);
-        }
-    }
-    partial void OnCurrentSettingIndexChanged(int oldValue, int newValue)
-    {
-        Title = Settings[newValue].ProjectId;
-        CanUpdate = false;
-        ImgAvatar = Settings[newValue].AppIcon;
-    }
-    public void AddAppCommand()
-    {
-        try
-        {
-            var window = new SettingWindow(Settings, this);
-            window.Show();
-        }
-        catch (Exception ex)
-        {
-            OnError?.Invoke(ex.Message);
-        }
-    }
-    public void StartCommand()
-    {
-        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= Settings.Count)
-        {
-            OnError?.Invoke("未选择有效的启动项。");
-            return;
-        }
-        try
-        {
-            Process.Start(new ProcessStartInfo
+            Settings = new ObservableCollection<LauncherSettingWrapper>(
+                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, x))
+            );
+
+            if (settings.Count > 0)
             {
-                FileName = Combine(Settings[CurrentSettingIndex].Setting.LocalPath, Settings[CurrentSettingIndex].Setting.AppName),
-                WorkingDirectory = AppContext.BaseDirectory,
-                UseShellExecute = true,
-                Verb = "runas"
-            });
-            OnStart?.Invoke();
+                CurrentSettingIndex = Math.Clamp(CurrentSettingIndex, 0, settings.Count - 1);
+                var current = Settings[CurrentSettingIndex];
+                Title = current.ProjectId;
+                ImgAvatar = current.AppIcon;
+            }
+
+            OnError += msg => LogMessages.Add(msg);
         }
-        catch (Exception ex)
+
+        // ✅ 提取公共逻辑
+        private bool TryGetCurrentSetting(out LauncherSettingWrapper setting)
         {
-            OnError?.Invoke(ex.Message);
-        }
-    }
-    public async void UpdateCommand()
-    {
-        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= Settings.Count)
-        {
+            if (CurrentSettingIndex >= 0 && CurrentSettingIndex < Settings.Count)
+            {
+                setting = Settings[CurrentSettingIndex];
+                return true;
+            }
+
             OnError?.Invoke("未选择有效的应用。");
-            return;
+            setting = null!;
+            return false;
         }
-        try
+
+        public void SelectSetting(string projectId)
         {
+            int index = Settings.ToList().FindIndex(x => x.ProjectId == projectId);
+            if (index >= 0) CurrentSettingIndex = index;
+        }
+
+        public void DeleteSetting(string projectId)
+        {
+            var item = Settings.FirstOrDefault(x => x.ProjectId == projectId);
+            if (item != null)
+            {
+                Settings.Remove(item);
+                SettingHelper.SaveSetting(Settings);
+            }
+        }
+
+        public void ModifySetting(string projectId)
+        {
+            var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
+            if (setting != null)
+                new SettingWindow(Settings, setting, this).Show();
+        }
+
+        partial void OnCurrentSettingIndexChanged(int oldValue, int newValue)
+        {
+            if (newValue >= 0 && newValue < Settings.Count)
+            {
+                var current = Settings[newValue];
+                Title = current.ProjectId;
+                CanUpdate = false;
+                ImgAvatar = current.AppIcon;
+            }
+        }
+
+        public void AddAppCommand()
+        {
+            try
+            {
+                new SettingWindow(Settings, this).Show();
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+            }
+        }
+
+        public void StartCommand()
+        {
+            if (!TryGetCurrentSetting(out var current)) return;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = Combine(current.Setting.LocalPath, current.Setting.AppName),
+                    WorkingDirectory = AppContext.BaseDirectory,
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+                OnStart?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+            }
+        }
+
+        public async void UpdateCommand()
+        {
+            if (!TryGetCurrentSetting(out var current)) return;
             if (Downloading) return;
-            OnUpdate?.Invoke();
-            LauncherUpdater updater = new LauncherUpdater(Settings[CurrentSettingIndex].Setting);
-            Downloading = true;
-            LogMessages.Add("开始下载更新...");
-            await updater.UpdateAsync(new ProgressReport(this),DownloadCallback);
-            Downloading = false;
-            LogMessages.Add("更新完成，点击启动按钮启动。");
-            CheckUpdate();
-        }
-        catch (Exception ex)
-        {
-            OnError?.Invoke(ex.Message);
-            Downloading = false;
-            DownloadText = "下载出错，请查看日志将问题发送给管理员！";
-        }
-    }
-    private void DownloadCallback(string commandFile)
-    {
-        var command = commandFile[0];
-        var str = commandFile.Substring(1);
-        switch (command)
-        {
-            case 's':
-                DownloadText = $"已存在{str}，跳过下载。";
-                break;
-            case 'd':
-                DownloadText = $"正在下载{str}...";
-                break;
-            case 'c':
-                DownloadText = $"下载完成！";
-                break;
-            default:
-                break;
-        }
-    }
-    public void OpenFolder()
-    {
-        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= Settings.Count)
-        {
-            OnError?.Invoke("未选择有效的应用。");
-            return;
-        }
-        //打开文件夹
-        var localPath = Combine(AppContext.BaseDirectory, Settings[CurrentSettingIndex].Setting.LocalPath);
-        if (Directory.Exists(localPath))
-            Process.Start("explorer.exe", localPath);
-        else
-            OnError?.Invoke("应用目录不存在。");
-    }
-    public async void CheckUpdate()
-    {
-        if (CurrentSettingIndex < 0 || CurrentSettingIndex >= Settings.Count)
-        {
-            OnError?.Invoke("未选择有效的应用。");
-            return;
-        }
-        try
-        {
-            LauncherUpdater updater = new LauncherUpdater(Settings[CurrentSettingIndex].Setting);
-            CanUpdate = await updater.HasUpdateAsync();
 
-            if (CanUpdate)
+            try
             {
-                LogMessages.Add("检测到新版本，点击更新按钮进行更新。");
+                Downloading = true;
+                OnUpdate?.Invoke();
+                LogMessages.Add("开始下载更新...");
+
+                var updater = new LauncherUpdater(current.Setting);
+                await updater.UpdateAsync(new ProgressReport(this), DownloadCallback);
+
+                LogMessages.Add("更新完成，点击启动按钮启动。");
+                CheckUpdate();
             }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+                DownloadText = "下载出错，请查看日志并反馈给管理员！";
+            }
+            finally
+            {
+                Downloading = false;
+            }
+        }
+
+        private void DownloadCallback(string commandFile)
+        {
+            if (string.IsNullOrEmpty(commandFile)) return;
+
+            char command = commandFile[0];
+            string str = commandFile.Length > 1 ? commandFile[1..] : "";
+
+            DownloadText = command switch
+            {
+                's' => $"已存在 {str}，跳过下载。",
+                'd' => $"正在下载 {str}...",
+                'c' => "下载完成！",
+                _ => DownloadText
+            };
+        }
+
+        public void OpenFolder()
+        {
+            if (!TryGetCurrentSetting(out var current)) return;
+
+            var localPath = Combine(AppContext.BaseDirectory, current.Setting.LocalPath);
+            if (Directory.Exists(localPath))
+                Process.Start("explorer.exe", localPath);
             else
+                OnError?.Invoke("应用目录不存在。");
+        }
+
+        public async void CheckUpdate()
+        {
+            if (!TryGetCurrentSetting(out var current)) return;
+
+            try
             {
-                if (await updater.GetRemoteManifestAsync() == null)
-                    LogMessages.Add("当前应用无远程版本，请检查ProjectID是否正确。");
-                else
-                    LogMessages.Add("当前已是最新版本。");
+                var updater = new LauncherUpdater(current.Setting);
+                CanUpdate = await updater.HasUpdateAsync();
+
+                string log = CanUpdate
+                    ? "检测到新版本，点击更新按钮进行更新。"
+                    : (await updater.GetRemoteManifestAsync() == null
+                        ? "当前应用无远程版本，请检查 ProjectID 是否正确。"
+                        : "当前已是最新版本。");
+
+                LogMessages.Add(log);
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
             }
         }
-        catch (Exception ex)
+
+        public class ProgressReport : IProgress<double>
         {
-            OnError?.Invoke(ex.Message);
-        }
-    }
-    public class ProgressReport : IProgress<double>
-    {
-        private MainViewModel _viewModel;
-        public ProgressReport(MainViewModel viewModel)
-        {
-            _viewModel = viewModel;
-        }
-        public void Report(double value)
-        {
-            _viewModel.DownloadProgress = (int)value;
-            if (value >= 100)
+            private readonly MainViewModel _viewModel;
+            public ProgressReport(MainViewModel viewModel) => _viewModel = viewModel;
+
+            public void Report(double value)
             {
-                _viewModel.Downloading = false;
+                _viewModel.DownloadProgress = (int)value;
+                if (value >= 100)
+                    _viewModel.Downloading = false;
             }
         }
     }
-}
 
-public class LauncherSettingWrapper : ObservableObject
-{
-    public LauncherSetting Setting { get; set; }
-
-    public string ProjectId => Setting.ProjectId;
-    public Bitmap? AppIcon => ImageHelper.LoadFromFile(Combine(AppContext.BaseDirectory, Setting.LocalPath, Setting.AppIcon));
-    public ICommand SelectCommand { get; }
-    public ICommand DeleteCommand { get; }
-
-    public LauncherSettingWrapper(Action<string> selectAction, Action<string> deleteAction, LauncherSetting setting)
+    public class LauncherSettingWrapper : ObservableObject
     {
-        Setting = setting;
-        SelectCommand = new RelayCommand(() => selectAction?.Invoke(setting.ProjectId));
-        DeleteCommand = new RelayCommand(() => deleteAction?.Invoke(setting.ProjectId));
+        public LauncherSetting Setting { get; }
+
+        public string ProjectId => Setting.ProjectId;
+
+        public Bitmap? AppIcon
+        {
+            get
+            {
+                var path = Combine(AppContext.BaseDirectory, Setting.LocalPath, Setting.AppIcon);
+                return ImageHelper.LoadFromFile(path) ?? ImageHelper.DefaultMap;
+            }
+        }
+
+        public ICommand SelectCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand ModifyCommand { get; }
+
+        public LauncherSettingWrapper(Action<string> select, Action<string> delete, Action<string> modify, LauncherSetting setting)
+        {
+            Setting = setting;
+            SelectCommand = new RelayCommand(() => select?.Invoke(setting.ProjectId));
+            DeleteCommand = new RelayCommand(() => delete?.Invoke(setting.ProjectId));
+            ModifyCommand = new RelayCommand(() => modify?.Invoke(setting.ProjectId));
+        }
     }
 }

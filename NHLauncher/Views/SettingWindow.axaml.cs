@@ -12,51 +12,92 @@ namespace NHLauncher
 {
     public partial class SettingWindow : Window
     {
-        private LauncherSetting setting;
-        private ObservableCollection<LauncherSettingWrapper> settings;
-        private MainViewModel _mainViewModel;
+        private readonly LauncherSetting _setting;
+        private readonly ObservableCollection<LauncherSettingWrapper> _settings;
+        private readonly MainViewModel _mainViewModel;
+        private readonly LauncherSettingWrapper? _currentWrapper;
+
         public SettingViewModel ViewModel { get; }
+
         public SettingWindow()
         {
             InitializeComponent();
-            setting = new LauncherSetting();
-            ViewModel = new SettingViewModel(setting);
-        }
-        public SettingWindow(ObservableCollection<LauncherSettingWrapper> settings, MainViewModel vm)
-        {
-            InitializeComponent();
-            this.settings = settings;
-            setting = new LauncherSetting();
-            _mainViewModel = vm;
-            ViewModel = new SettingViewModel(setting);
+            _setting = new LauncherSetting();
+            ViewModel = new SettingViewModel(_setting);
             DataContext = ViewModel;
         }
 
+        public SettingWindow(ObservableCollection<LauncherSettingWrapper> settings, MainViewModel vm)
+        {
+            InitializeComponent();
+            _setting = new LauncherSetting();
+            _settings = settings;
+            _mainViewModel = vm;
+            ViewModel = new SettingViewModel(_setting);
+            DataContext = ViewModel;
+        }
+
+        public SettingWindow(ObservableCollection<LauncherSettingWrapper> settings, LauncherSettingWrapper current, MainViewModel vm)
+        {
+            InitializeComponent();
+            _setting = new LauncherSetting();
+            _settings = settings;
+            _mainViewModel = vm;
+            _currentWrapper = current;
+
+            // 复制旧配置内容
+            CopySetting(current.Setting, _setting);
+
+            ViewModel = new SettingViewModel(_setting);
+            DataContext = ViewModel;
+        }
+
+        /// <summary>
+        /// 从 source 复制到 target。
+        /// </summary>
+        private static void CopySetting(LauncherSetting source, LauncherSetting target)
+        {
+            target.Platform = source.Platform;
+            target.ProjectId = source.ProjectId;
+            target.AppName = source.AppName;
+            target.ServerBaseUrl = source.ServerBaseUrl;
+        }
 
         private void SaveButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            // 可以在这里保存到本地文件，如果需要
-            if(settings.Any(x=>x.Setting.ProjectId == setting.ProjectId))
+            // 检查项目 ID 是否冲突
+            if (_currentWrapper == null && _settings.Any(x => x.Setting.ProjectId == _setting.ProjectId))
             {
+                _mainViewModel.LogMessages.Add("存在相同的项目ID，请修改后重试。");
                 return;
             }
-            settings.Add(new LauncherSettingWrapper(_mainViewModel.SelectSetting, _mainViewModel.DeleteSetting, setting));
-            if (DataContext != null)
+
+            var newWrapper = new LauncherSettingWrapper(
+                _mainViewModel.SelectSetting,
+                _mainViewModel.DeleteSetting,
+                _mainViewModel.ModifySetting,
+                _setting);
+
+            if (_currentWrapper != null)
             {
-                SettingHelper.SaveSetting(settings); // 保存设置到文件
+                // 修改现有项：直接替换而非删除再插入
+                int index = _settings.IndexOf(_currentWrapper);
+                if (index >= 0)
+                    _settings[index] = newWrapper;
             }
-            Close(ViewModel); // 返回修改后的设置
+            else
+            {
+                // 新增项
+                _settings.Add(newWrapper);
+            }
+
+            SettingHelper.SaveSetting(_settings);
+            Close(ViewModel);
         }
 
         private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            //恢复
-            ViewModel.Platform = setting.Platform;
-            ViewModel.ProjectId = setting.ProjectId;
-            ViewModel.AppName = setting.AppName;
-            ViewModel.ServerBaseUrl = setting.ServerBaseUrl;
-
-            Close(ViewModel); // 取消
+            Close(ViewModel);
         }
     }
 }
