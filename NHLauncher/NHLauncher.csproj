@@ -745,4 +745,10 @@
 	<ItemGroup>
 	  <AvaloniaResource Remove="Assets\avalonia-logo.ico" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\CreateNewProfileWindow.axaml.cs">
+	    <DependentUpon>CreateNewProfileWindow.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 </Project>

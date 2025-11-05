@@ -14,6 +14,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="NHLauncher.Updater.exe" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="NHLauncher.Updater.exe">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="xrf.ico" />
 	</ItemGroup>
 

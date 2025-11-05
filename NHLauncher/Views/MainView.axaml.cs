@@ -11,13 +11,12 @@ namespace NHLauncher.Views;
 
 public partial class MainView : UserControl
 {
-    private SettingWindow? currrentSettingWindow = null;
     private List<LauncherSetting> setting;
     public MainView()
     {
         InitializeComponent();
         setting = SettingHelper.LoadOrCreateSetting();
-        var vm = new MainViewModel(setting);
+        var vm = new MainViewModel(this, setting);
         vm.OnError += async (msg) =>
         {
             await MessageBoxManager
@@ -35,28 +34,6 @@ public partial class MainView : UserControl
         };
         vm.LogMessages.CollectionChanged += (e, s) => LogListBox.ScrollIntoView(LogListBox.ItemCount);
         DataContext = vm;
-    }
-    private void BTN_Close_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        this.GetWindow()?.Close();
-    }
-    private void BTN_Set_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        //if (currrentSettingWindow != null && currrentSettingWindow.IsVisible)
-        //{
-        //    currrentSettingWindow.Activate();
-        //    return;
-        //}
-        //else
-        //{
-        //    currrentSettingWindow = new SettingWindow(Setting);
-        //    currrentSettingWindow.Closed += (s, e) => currrentSettingWindow = null;
-        //    currrentSettingWindow.Show();
-        //}
-    }
-    private void Hyperlink_PointerPressed1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        OpenUrl("https://rule.tencent.com/rule/46a15f24-e42c-4cb6-a308-2347139b1201");
     }
     private void OpenUrl(string url)
     {

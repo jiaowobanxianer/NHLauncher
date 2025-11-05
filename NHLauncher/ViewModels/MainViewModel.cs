@@ -1,3 +1,4 @@
+﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,13 +33,16 @@ namespace NHLauncher.ViewModels
         public event Action? OnUpdate;
         public event Action? OnStart;
 
+        private UserControl? owner;
+        private SettingWindow? currrentSettingWindow = null;
         public MainViewModel()
-            : this(SettingHelper.LoadOrCreateSetting()) { }
+            : this(null, SettingHelper.LoadOrCreateSetting()) { }
 
-        public MainViewModel(List<LauncherSetting> settings)
+        public MainViewModel(UserControl owner, List<LauncherSetting> settings)
         {
+            this.owner = owner;
             Settings = new ObservableCollection<LauncherSettingWrapper>(
-                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, x))
+                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, RepairSetting, x))
             );
 
             if (settings.Count > 0)
@@ -86,9 +90,30 @@ namespace NHLauncher.ViewModels
         {
             var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
             if (setting != null)
-                new SettingWindow(Settings, setting, this).Show();
+                new CreateNewProfileWindow(Settings, setting, this).Show();
         }
 
+        public async Task RepairSetting(string projectId)
+        {
+            LogMessages.Add("开始修复应用...");
+            try
+            {
+                var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
+                var downloader = new LauncherDownloader();
+                Downloading = true;
+                await new LauncherUpdater(setting!.Setting).UpdateAsync(new ProgressReport(this), DownloadCallback, null);
+                Downloading = false;
+                LogMessages.Add("修复完成，点击启动按钮启动。");
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+            }
+            finally
+            {
+                Downloading = false;
+            }
+        }
         partial void OnCurrentSettingIndexChanged(int oldValue, int newValue)
         {
             if (newValue >= 0 && newValue < Settings.Count)
@@ -132,7 +157,28 @@ namespace NHLauncher.ViewModels
                 OnError?.Invoke(ex.Message);
             }
         }
-
+        public void MinimalCommand()
+        {
+            owner?.GetWindow()?.Hide();
+        }
+        public void SetCommand()
+        {
+            if (currrentSettingWindow != null && currrentSettingWindow.IsVisible)
+            {
+                currrentSettingWindow.Activate();
+                return;
+            }
+            else
+            {
+                currrentSettingWindow = new SettingWindow();
+                currrentSettingWindow.Closed += (s, e) => currrentSettingWindow = null;
+                currrentSettingWindow.Show();
+            }
+        }
+        public void CloseCommand()
+        {
+            Environment.Exit(10010);
+        }
         public async void UpdateCommand()
         {
             if (!TryGetCurrentSetting(out var current)) return;
@@ -243,13 +289,15 @@ namespace NHLauncher.ViewModels
         public ICommand SelectCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand ModifyCommand { get; }
+        public ICommand RepairCommand { get; }
 
-        public LauncherSettingWrapper(Action<string> select, Action<string> delete, Action<string> modify, LauncherSetting setting)
+        public LauncherSettingWrapper(Action<string> select, Action<string> delete, Action<string> modify, Func<string, Task> repair, LauncherSetting setting)
         {
             Setting = setting;
             SelectCommand = new RelayCommand(() => select?.Invoke(setting.ProjectId));
             DeleteCommand = new RelayCommand(() => delete?.Invoke(setting.ProjectId));
             ModifyCommand = new RelayCommand(() => modify?.Invoke(setting.ProjectId));
+            RepairCommand = new RelayCommand(() => repair?.Invoke(setting.ProjectId));
         }
     }
 }
