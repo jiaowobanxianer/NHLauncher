@@ -1,4 +1,4 @@
-﻿using Avalonia.Media.Imaging;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LauncherHotupdate.Core;
@@ -104,7 +104,7 @@ namespace NHLauncher.ViewModels
         {
             try
             {
-                new SettingWindow(Settings, this).Show();
+                new CreateNewProfileWindow(Settings, this).Show();
             }
             catch (Exception ex)
             {
