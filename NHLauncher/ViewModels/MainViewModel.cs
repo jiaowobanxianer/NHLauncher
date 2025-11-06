@@ -80,6 +80,8 @@ namespace NHLauncher.ViewModels
             var item = Settings.FirstOrDefault(x => x.ProjectId == projectId);
             if (item != null)
             {
+                var localPath = Combine(AppContext.BaseDirectory, item!.Setting.LocalPath);
+                Directory.Delete(localPath, true);
                 Settings.Remove(item);
                 SettingHelper.SaveSetting(Settings);
             }
@@ -113,7 +115,7 @@ namespace NHLauncher.ViewModels
                 var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
                 var downloader = new LauncherDownloader();
                 Downloading = true;
-                await new LauncherUpdater(setting!.Setting).UpdateAsync(new ProgressReport(this), DownloadCallback);
+                await new LauncherUpdater(setting!.Setting).UpdateAllAsync(new ProgressReport(this), DownloadCallback);
                 Downloading = false;
                 LogMessages.Add("修复完成，点击启动按钮启动。");
             }

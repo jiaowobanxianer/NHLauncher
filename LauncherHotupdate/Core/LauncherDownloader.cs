@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,24 +10,38 @@ using System.Threading.Tasks;
 
 namespace LauncherHotupdate.Core
 {
-    public class LauncherDownloader
+    public class LauncherDownloader : IDisposable
     {
         private readonly HttpClient _httpClient;
-        private const int BufferSize = 81920;
+
+        private const int BufferSize = 1024 * 1024; // 1MB
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource(); // 全局取消源
 
         public LauncherDownloader()
         {
             var handler = new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+                MaxConnectionsPerServer = int.MaxValue
             };
 
             _httpClient = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromHours(2)
             };
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) => CancelDownloads();
         }
-
+        /// <summary>
+        /// 主动取消所有下载任务
+        /// </summary>
+        public void CancelDownloads()
+        {
+            if (!_cts.IsCancellationRequested)
+            {
+                _cts.Cancel(); // 触发取消信号
+                _cts.Dispose();
+            }
+        }
         #region Manifest 加载
 
         public async Task<Manifest?> LoadRemoteManifestAsync(string api, string projectPath)
@@ -108,12 +123,13 @@ namespace LauncherHotupdate.Core
             Action<string>? callBack = null,
             CancellationToken token = default)
         {
+            var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(token, _cts.Token).Token;
             await DownloadInternalAsync(
                 files,
                 localPath,
                 progress,
                 callBack,
-                token,
+                linkedToken,
                 async file =>
                 {
                     var form = new MultipartFormDataContent
@@ -140,12 +156,13 @@ namespace LauncherHotupdate.Core
             Action<string>? callBack = null,
             CancellationToken token = default)
         {
+            var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(token, _cts.Token).Token;
             await DownloadInternalAsync(
                 files,
                 localPath,
                 progress,
                 callBack,
-                token,
+                linkedToken,
                 async file =>
                 {
                     var url = $"{cdnBaseUrl.TrimEnd('/')}/{projectPath.TrimStart('/').TrimEnd('/')}/{file.Path.Replace("\\", "/")}";
@@ -153,12 +170,12 @@ namespace LauncherHotupdate.Core
                 });
         }
         private async Task DownloadInternalAsync(
-            List<Manifest.FileEntry>? files,
-            string localPath,
-            IProgress<double>? progress,
-            Action<string>? callBack,
-            CancellationToken token,
-            Func<Manifest.FileEntry, Task<HttpResponseMessage>> getResponseAsync)
+    List<Manifest.FileEntry>? files,
+    string localPath,
+    IProgress<double>? progress,
+    Action<string>? callBack,
+    CancellationToken token,
+    Func<Manifest.FileEntry, Task<HttpResponseMessage>> getResponseAsync)
         {
             if (files == null || files.Count == 0)
             {
@@ -172,60 +189,102 @@ namespace LauncherHotupdate.Core
             long downloaded = 0;
             var buffer = new byte[BufferSize];
 
+            // ✅ 限制最大并发任务数（比如 4）
+            const int maxConcurrency = 4;
+            using var semaphore = new SemaphoreSlim(maxConcurrency);
+            var activeDownloads = new ConcurrentDictionary<Manifest.FileEntry, long>();
+
+            var tasks = new List<Task>();
+
             foreach (var file in files)
             {
-                string localFile = Path.Combine(localPath, file.Path);
-                Directory.CreateDirectory(Path.GetDirectoryName(localFile)!);
+                // 检查取消（避免创建新任务）
+                token.ThrowIfCancellationRequested();
+                await semaphore.WaitAsync(token); // 控制并发
 
-                // ✅ 跳过已存在文件
-                if (ShouldSkipFile(localFile, file))
+                tasks.Add(Task.Run(async () =>
                 {
-                    downloaded += file.Size;
-                    progress?.Report((double)downloaded / totalSize * 100);
-                    callBack?.Invoke($"s{file.Path}");
-                    continue;
-                }
+                    // 检查取消（避免创建新任务）
+                    token.ThrowIfCancellationRequested();
+                    string localFile = Path.Combine(localPath, file.Path);
+                    Directory.CreateDirectory(Path.GetDirectoryName(localFile)!);
 
-                callBack?.Invoke($"d{file.Path}");
-
-                var tempFile = localFile + ".tmp";
-
-                try
-                {
-                    using var response = await getResponseAsync(file);
-
-                    if (!response.IsSuccessStatusCode)
-                        throw new Exception($"下载失败 ({response.StatusCode})");
-
-                    await using var stream = await response.Content.ReadAsStreamAsync();
-                    await using var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, true);
-
-                    int bytesRead;
-                    long current = 0;
-                    while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, BufferSize), token)) > 0)
+                    // 跳过已存在文件
+                    if (ShouldSkipFile(localFile, file))
                     {
-                        await fs.WriteAsync(buffer.AsMemory(0, bytesRead), token);
-                        current += bytesRead;
-                        progress?.Report((double)(downloaded + current) / totalSize * 100);
+                        Interlocked.Add(ref downloaded, file.Size);
+                        progress?.Report((double)downloaded / totalSize * 100);
+                        callBack?.Invoke($"s{file.Path}");
+                        semaphore.Release();
+                        return;
                     }
-                    await fs.FlushAsync(token);
-                    await fs.DisposeAsync();
-                    await stream.DisposeAsync();
-                    MoveToTargetFile(tempFile, localFile);
-                }
-                catch (Exception ex)
-                {
-                    if (File.Exists(tempFile)) File.Delete(tempFile);
-                    throw new IOException($"下载 {file.Path} 出错: {ex.Message}", ex);
-                }
 
-                downloaded += file.Size;
-                progress?.Report((double)downloaded / totalSize * 100);
+                    callBack?.Invoke($"d{file.Path}");
+                    var tempFile = localFile + ".tmp";
+                    activeDownloads.TryAdd(file, 0); // 初始化当前任务的临时进度
+                    try
+                    {
+                        using var response = await getResponseAsync(file);
+
+                        if (!response.IsSuccessStatusCode)
+                            throw new Exception($"下载失败 ({response.StatusCode})");
+
+                        await using var stream = await response.Content.ReadAsStreamAsync();
+                        await using var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, true);
+
+                        int bytesRead;
+                        long current = 0;
+                        var localBuffer = new byte[BufferSize]; // 避免共享 buffer
+
+                        while ((bytesRead = await stream.ReadAsync(localBuffer.AsMemory(0, BufferSize), token)) > 0)
+                        {
+                            await fs.WriteAsync(localBuffer.AsMemory(0, bytesRead), token);
+                            current += bytesRead;
+                            activeDownloads[file] = current;
+                            ReportProgress(progress, downloaded, activeDownloads, totalSize);
+                        }
+
+                        await fs.FlushAsync(token);
+                        await fs.DisposeAsync();
+                        await stream.DisposeAsync();
+                        MoveToTargetFile(tempFile, localFile);
+
+                        activeDownloads.TryRemove(file, out _);
+                        Interlocked.Add(ref downloaded, file.Size);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (File.Exists(tempFile)) File.Delete(tempFile);
+                        activeDownloads.TryRemove(file, out _); // 异常时移除临时进度
+                        Console.WriteLine($"下载 {file.Path} 出错: {ex.Message}");
+                        throw;
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+
+                }, token));
             }
 
+            await Task.WhenAll(tasks);
+
+            progress?.Report(100);
             callBack?.Invoke("c");
         }
 
+        private void ReportProgress(IProgress<double>? progress, long downloaded, ConcurrentDictionary<Manifest.FileEntry, long> activeDownloads, long totalSize)
+        {
+            if (progress == null || totalSize == 0) return;
+
+            // 计算所有正在下载的任务的临时进度总和
+            long activeTotal = activeDownloads.Values.Sum();
+            // 总进度 =（已完成 + 下载中）/ 总大小 * 100
+            double totalProgress = (double)(downloaded + activeTotal) / totalSize * 100;
+            // 避免进度超过100%（可能因网络传输误差导致）
+            totalProgress = Math.Min(totalProgress, 100);
+            progress.Report(totalProgress);
+        }
         #endregion
 
         #region 工具方法
@@ -261,6 +320,12 @@ namespace LauncherHotupdate.Core
         public class MessageWrapper
         {
             public string message { get; set; } = string.Empty;
+        }
+        public void Dispose()
+        {
+            CancelDownloads();
+            _httpClient.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         #endregion

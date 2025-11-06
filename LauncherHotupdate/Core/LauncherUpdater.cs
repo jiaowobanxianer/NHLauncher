@@ -39,7 +39,7 @@ namespace LauncherHotupdate.Core
             return diff?.Count > 0;
         }
 
-        public List<Manifest.FileEntry>? GetDiff(Manifest local, Manifest remote)
+        public List<Manifest.FileEntry>? GetDiff(Manifest? local, Manifest? remote)
             => _downloader.Compare(remote, local);
 
         public async Task<Manifest?> GetRemoteManifestAsync()
@@ -56,61 +56,94 @@ namespace LauncherHotupdate.Core
             IProgress<double>? progress = null,
             Action<string>? callBack = null,
             CancellationToken token = default)
-            => UpdateInternalAsync(progress, callBack, token);
+            => UpdateInternalAsync(progress, callBack, async () =>
+            {
+                var remote = await GetRemoteManifestAsync();
+                if (remote == null)
+                {
+                    Console.WriteLine("未获取到远程 manifest，更新终止。");
+                    return null;
+                }
+                return remote;
+            },
+            () => Task.FromResult(_downloader.LoadLocalManifest(_settings.ManifestFile))
+            , token);
+        public Task UpdateAllAsync(
+            IProgress<double>? progress = null,
+            Action<string>? callBack = null,
+            CancellationToken token = default)
+            => UpdateInternalAsync(progress, callBack,
+                async () =>
+                {
+                    return await GetRemoteManifestAsync();
+                },
+                () => Task.FromResult<Manifest?>(null)
+                , token);
 
 
         /// <summary>
         /// 内部通用更新逻辑
         /// </summary>
         private async Task UpdateInternalAsync(
-            IProgress<double>? progress,
-            Action<string>? callBack,
-            CancellationToken token)
+    IProgress<double>? progress,
+    Action<string>? callBack,
+    Func<Task<Manifest?>>? getRemote,
+    Func<Task<Manifest?>>? getLocal,
+    CancellationToken token)
         {
-            var remote = await GetRemoteManifestAsync();
-            if (remote == null)
+            try
             {
-                Console.WriteLine("未获取到远程 manifest，更新终止。");
-                return;
-            }
+                if (getRemote == null)
+                {
+                    return; // 远程为空直接返回
+                }
 
-            var local = _downloader.LoadLocalManifest(_settings.ManifestFile);
-            if (!HasUpdate(local, remote, out var diff) || diff == null || diff.Count == 0)
+                var remote = await getRemote();
+                if (remote == null)
+                {
+                    return; // 远程 manifest 为 null，直接返回
+                }
+
+                var local = getLocal != null ? await getLocal() : null;
+
+                var diff = GetDiff(local, remote) ?? new List<Manifest.FileEntry>();
+
+                if (diff.Count > 0)
+                {
+                    // 执行文件下载
+                    switch (_settings.UseCdn)
+                    {
+                        case false:
+                            await _downloader.DownloadFilesAsync(
+                                _settings.API,
+                                _settings.RemotePath,
+                                _settings.LocalPath,
+                                diff,
+                                progress,
+                                callBack,
+                                token);
+                            break;
+
+                        case true:
+                            await _downloader.DownloadFilesFromStaticAsync(
+                                _settings.ServerBaseUrl,
+                                _settings.RemotePath,
+                                _settings.LocalPath,
+                                diff,
+                                progress,
+                                callBack,
+                                token);
+                            break;
+                    }
+                }
+                SaveManifest(remote);
+            }
+            finally
             {
                 callBack?.Invoke("c");
-                Console.WriteLine("暂无更新。");
-                return;
             }
-
-            // 执行文件下载
-            switch (_settings.UseCdn)
-            {
-                case false:
-                    await _downloader.DownloadFilesAsync(
-                        _settings.API,
-                        _settings.RemotePath,
-                        _settings.LocalPath,
-                        diff,
-                        progress,
-                        callBack,
-                        token);
-                    break;
-
-                case true:
-                    await _downloader.DownloadFilesFromStaticAsync(
-                        _settings.ServerBaseUrl,
-                        _settings.RemotePath,
-                        _settings.LocalPath,
-                        diff,
-                        progress,
-                        callBack,
-                        token);
-                    break;
-            }
-
-            // 保存新 manifest
-            SaveManifest(remote);
         }
+
 
         #endregion
 
