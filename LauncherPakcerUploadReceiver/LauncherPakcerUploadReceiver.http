@@ -1,0 +1,6 @@
+@LauncherPakcerUploadReceiver_HostAddress = http://localhost:5029
+
+GET {{LauncherPakcerUploadReceiver_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
