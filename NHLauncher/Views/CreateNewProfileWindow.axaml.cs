@@ -18,15 +18,6 @@ namespace NHLauncher
         private readonly LauncherSettingWrapper? _currentWrapper;
 
         public CreateNewProfileViewModel ViewModel { get; }
-
-        public CreateNewProfileWindow()
-        {
-            InitializeComponent();
-            _setting = LauncherSetting.CreateInstance();
-            ViewModel = new CreateNewProfileViewModel(_setting);
-            DataContext = ViewModel;
-        }
-
         public CreateNewProfileWindow(ObservableCollection<LauncherSettingWrapper> settings, MainViewModel vm)
         {
             InitializeComponent();
@@ -70,7 +61,7 @@ namespace NHLauncher
             // 检查项目 ID 是否冲突
             if (_currentWrapper == null && _settings.Any(x => x.Setting.ProjectId == _setting.ProjectId))
             {
-                _mainViewModel.LogMessages.Add("存在相同的项目ID，请修改后重试。");
+                _mainViewModel?.LogMessages.Add("存在相同的项目ID，请修改后重试。");
                 return;
             }
 

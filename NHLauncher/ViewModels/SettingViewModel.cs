@@ -46,7 +46,7 @@ namespace NHLauncher.ViewModels
                 var localManifestPath = Path.Combine(AppContext.BaseDirectory, "manifest.json");
                 var local = JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(localManifestPath));
                 var remote = await updater.GetRemoteManifestAsync();
-                var canUpdate = updater.HasUpdate(local, remote);
+                var canUpdate = updater.HasUpdate(local!, remote!);
 
                 if (!canUpdate)
                 {

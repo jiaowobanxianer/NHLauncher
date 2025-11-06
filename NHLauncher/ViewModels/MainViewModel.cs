@@ -38,7 +38,7 @@ namespace NHLauncher.ViewModels
         public MainViewModel()
             : this(null, SettingHelper.LoadOrCreateSetting()) { }
 
-        public MainViewModel(UserControl owner, List<LauncherSetting> settings)
+        public MainViewModel(UserControl? owner, List<LauncherSetting> settings)
         {
             this.owner = owner;
             Settings = new ObservableCollection<LauncherSettingWrapper>(
