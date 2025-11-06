@@ -5,12 +5,12 @@
 			 xmlns:vm="clr-namespace:NHLauncher.ViewModels"
 			 xmlns:views="clr-namespace:NHLauncher.Views"
 			 mc:Ignorable="d"
+			 d:DesignWidth="800" d:DesignHeight="400"
 			 x:Class="NHLauncher.Views.MainView"
 			 x:DataType="vm:MainViewModel"
 			 Background="Transparent"
 			 CornerRadius="10"
-			 ClipToBounds="True"
-			 d:DesignWidth="800" d:DesignHeight="400">
+			 ClipToBounds="True">
 
 	<Design.DataContext>
 		<vm:MainViewModel/>
@@ -69,6 +69,8 @@
 															  Command="{Binding DeleteCommand}"/>
 													<MenuItem Header="修改"
 															  Command="{Binding ModifyCommand}"/>
+													<MenuItem Header="打开文件夹"
+															  Command="{Binding OpenFolderCommand}"/>
 													<MenuItem Header="修复"
 															  Command="{Binding RepairCommand}"/>
 												</ContextMenu>
@@ -117,13 +119,13 @@
 
 					<!-- 中间日志 -->
 					<Grid Grid.Row="1" Margin="40,20,40,20">
-						<Border CornerRadius="5" Background="#50505000">
+						<Border CornerRadius="5" Background="#50505000" MinHeight="100">
 							<ListBox x:Name="LogListBox" Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
 						</Border>
 					</Grid>
 
 					<!-- 底部操作 -->
-					<Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,25">
+					<Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,0">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
 							<ColumnDefinition Width="Auto"/>
@@ -144,9 +146,6 @@
 
 							<Button Foreground="#2D77E5" HorizontalAlignment="Center" Background="Transparent" Command="{Binding CheckUpdate}" CornerRadius="5">
 								检查更新
-							</Button>
-							<Button Foreground="#2D77E5" HorizontalAlignment="Center" Background="Transparent" Command="{Binding OpenFolder}" CornerRadius="5">
-								打开文件夹
 							</Button>
 						</StackPanel>
 					</Grid>

@@ -11,7 +11,7 @@ namespace NHLauncher.ViewModels
 
         public CreateNewProfileViewModel()
         { 
-            _setting = new LauncherSetting();
+            _setting = LauncherSetting.CreateInstance();
         }
         public CreateNewProfileViewModel(LauncherSetting setting)
         {
@@ -56,7 +56,18 @@ namespace NHLauncher.ViewModels
                 }
             }
         }
-
+        public bool UseCDN
+        {
+            get => _setting.UseCdn;
+            set
+            {
+                if (_setting.UseCdn != value)
+                {
+                    _setting.UseCdn = value;
+                    OnPropertyChanged(nameof(UseCDN));
+                }
+            }
+        }
         public string ServerBaseUrl
         {
             get => _setting.ServerBaseUrl;
@@ -71,12 +82,12 @@ namespace NHLauncher.ViewModels
         }
         public string API
         {
-            get => _setting.ServerBaseUrl;
+            get => _setting.API;
             set
             {
-                if (_setting.ServerBaseUrl != value)
+                if (_setting.API != value)
                 {
-                    _setting.ServerBaseUrl = value;
+                    _setting.API = value;
                     OnPropertyChanged(nameof(API));
                 }
             }

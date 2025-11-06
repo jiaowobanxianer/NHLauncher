@@ -35,12 +35,4 @@ public partial class MainView : UserControl
         vm.LogMessages.CollectionChanged += (e, s) => LogListBox.ScrollIntoView(LogListBox.ItemCount);
         DataContext = vm;
     }
-    private void OpenUrl(string url)
-    {
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = url,
-            UseShellExecute = true
-        });
-    }
 }

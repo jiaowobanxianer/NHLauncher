@@ -42,7 +42,7 @@ namespace NHLauncher.ViewModels
         {
             this.owner = owner;
             Settings = new ObservableCollection<LauncherSettingWrapper>(
-                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, RepairSetting, x))
+                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, RepairSetting, OpenFolder, x))
             );
 
             if (settings.Count > 0)
@@ -56,7 +56,6 @@ namespace NHLauncher.ViewModels
             OnError += msg => LogMessages.Add(msg);
         }
 
-        // ✅ 提取公共逻辑
         private bool TryGetCurrentSetting(out LauncherSettingWrapper setting)
         {
             if (CurrentSettingIndex >= 0 && CurrentSettingIndex < Settings.Count)
@@ -93,6 +92,19 @@ namespace NHLauncher.ViewModels
                 new CreateNewProfileWindow(Settings, setting, this).Show();
         }
 
+        public void OpenFolder(string projectId)
+        {
+            var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
+            if (setting != null)
+            {
+                var localPath = Combine(AppContext.BaseDirectory, setting.Setting.LocalPath);
+                if (Directory.Exists(localPath))
+                    Process.Start("explorer.exe", localPath);
+                else
+                    OnError?.Invoke("应用目录不存在。");
+            }
+        }
+
         public async Task RepairSetting(string projectId)
         {
             LogMessages.Add("开始修复应用...");
@@ -101,7 +113,7 @@ namespace NHLauncher.ViewModels
                 var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
                 var downloader = new LauncherDownloader();
                 Downloading = true;
-                await new LauncherUpdater(setting!.Setting).UpdateAsync(new ProgressReport(this), DownloadCallback, null);
+                await new LauncherUpdater(setting!.Setting).UpdateAsync(new ProgressReport(this), DownloadCallback);
                 Downloading = false;
                 LogMessages.Add("修复完成，点击启动按钮启动。");
             }
@@ -223,17 +235,6 @@ namespace NHLauncher.ViewModels
             };
         }
 
-        public void OpenFolder()
-        {
-            if (!TryGetCurrentSetting(out var current)) return;
-
-            var localPath = Combine(AppContext.BaseDirectory, current.Setting.LocalPath);
-            if (Directory.Exists(localPath))
-                Process.Start("explorer.exe", localPath);
-            else
-                OnError?.Invoke("应用目录不存在。");
-        }
-
         public async void CheckUpdate()
         {
             if (!TryGetCurrentSetting(out var current)) return;
@@ -290,14 +291,16 @@ namespace NHLauncher.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand ModifyCommand { get; }
         public ICommand RepairCommand { get; }
+        public ICommand OpenFolderCommand { get; }
 
-        public LauncherSettingWrapper(Action<string> select, Action<string> delete, Action<string> modify, Func<string, Task> repair, LauncherSetting setting)
+        public LauncherSettingWrapper(Action<string> select, Action<string> delete, Action<string> modify, Func<string, Task> repair, Action<string> openFolder, LauncherSetting setting)
         {
             Setting = setting;
             SelectCommand = new RelayCommand(() => select?.Invoke(setting.ProjectId));
             DeleteCommand = new RelayCommand(() => delete?.Invoke(setting.ProjectId));
             ModifyCommand = new RelayCommand(() => modify?.Invoke(setting.ProjectId));
             RepairCommand = new RelayCommand(() => repair?.Invoke(setting.ProjectId));
+            OpenFolderCommand = new RelayCommand(() => openFolder?.Invoke(setting.ProjectId));
         }
     }
 }

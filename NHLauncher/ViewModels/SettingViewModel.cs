@@ -40,7 +40,7 @@ namespace NHLauncher.ViewModels
             try
             {
                 var json = File.ReadAllText(SettingFile);
-                setting = JsonConvert.DeserializeObject<LauncherSetting>(json) ?? new LauncherSetting();
+                setting = JsonConvert.DeserializeObject<LauncherSetting>(json) ?? LauncherSetting.CreateInstance();
 
                 var updater = new LauncherUpdater(setting);
                 var localManifestPath = Path.Combine(AppContext.BaseDirectory, "manifest.json");
@@ -67,7 +67,7 @@ namespace NHLauncher.ViewModels
                 Updating = true;
                 DownloadProgress = 0;
 
-                await updater.UpdateAsync(this, null,local); // this 实现 IProgress<double>
+                await updater.UpdateAsync(this, null); // this 实现 IProgress<double>
 
                 Updating = false;
                 File.Copy(Path.Combine(AppContext.BaseDirectory, setting.ManifestFile), localManifestPath,true);

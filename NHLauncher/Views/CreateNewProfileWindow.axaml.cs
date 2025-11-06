@@ -22,7 +22,7 @@ namespace NHLauncher
         public CreateNewProfileWindow()
         {
             InitializeComponent();
-            _setting = new LauncherSetting();
+            _setting = LauncherSetting.CreateInstance();
             ViewModel = new CreateNewProfileViewModel(_setting);
             DataContext = ViewModel;
         }
@@ -30,7 +30,7 @@ namespace NHLauncher
         public CreateNewProfileWindow(ObservableCollection<LauncherSettingWrapper> settings, MainViewModel vm)
         {
             InitializeComponent();
-            _setting = new LauncherSetting();
+            _setting = LauncherSetting.CreateInstance();
             _settings = settings;
             _mainViewModel = vm;
             ViewModel = new CreateNewProfileViewModel(_setting);
@@ -40,7 +40,7 @@ namespace NHLauncher
         public CreateNewProfileWindow(ObservableCollection<LauncherSettingWrapper> settings, LauncherSettingWrapper current, MainViewModel vm)
         {
             InitializeComponent();
-            _setting = new LauncherSetting();
+            _setting = LauncherSetting.CreateInstance();
             _settings = settings;
             _mainViewModel = vm;
             _currentWrapper = current;
@@ -61,6 +61,8 @@ namespace NHLauncher
             target.ProjectId = source.ProjectId;
             target.AppName = source.AppName;
             target.ServerBaseUrl = source.ServerBaseUrl;
+            target.UseCdn = source.UseCdn;
+            target.API = source.API;
         }
 
         private void SaveButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -77,6 +79,7 @@ namespace NHLauncher
                 _mainViewModel.DeleteSetting,
                 _mainViewModel.ModifySetting,
                 _mainViewModel.RepairSetting,
+                _mainViewModel.OpenFolder,
                 _setting);
 
             if (_currentWrapper != null)
