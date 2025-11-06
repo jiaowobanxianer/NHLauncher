@@ -1,4 +1,4 @@
-name: Avalonia Desktop Release Build
+name: Avalonia + ASP.NET Release Build
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [ Release ]
+        configuration: [Release]
 
     steps:
     - name: Checkout
@@ -24,21 +24,53 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Restore (Desktop only)
+    # ------------------ NHLauncher.Desktop ------------------
+    - name: Restore NHLauncher.Desktop
       run: dotnet restore NHLauncher.Desktop/NHLauncher.Desktop.csproj
 
-    - name: Build (Desktop only)
-      run: dotnet build NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }} --no-restore
+    - name: Publish NHLauncher.Desktop (win-x64)
+      run: dotnet publish NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }} -o publish/NHLauncher.Desktop/win-x64 -r win-x64 --self-contained true
 
-    - name: Publish (self-contained Win-x64)
-      run: dotnet publish NHLauncher.Desktop/NHLauncher.Desktop.csproj -c ${{ matrix.configuration }} -o publish/${{ matrix.configuration }} -r win-x64 --self-contained true
+    - name: Zip NHLauncher.Desktop
+      run: Compress-Archive -Path publish/NHLauncher.Desktop/win-x64/* -DestinationPath NHLauncher-${{ github.ref_name }}-win-x64.zip
 
-    - name: Zip build output
-      run: Compress-Archive -Path publish/${{ matrix.configuration }}/* -DestinationPath NHLauncher-${{ github.ref_name }}.zip
 
+    # ------------------ LauncherPacker ------------------
+    - name: Restore LauncherPacker
+      run: dotnet restore LauncherPacker/LauncherPacker.csproj
+
+    - name: Publish LauncherPacker (win-x64)
+      run: dotnet publish LauncherPacker/LauncherPacker.csproj -c ${{ matrix.configuration }} -o publish/LauncherPacker/win-x64 -r win-x64 --self-contained true
+
+    - name: Zip LauncherPacker
+      run: Compress-Archive -Path publish/LauncherPacker/win-x64/* -DestinationPath LauncherPacker-${{ github.ref_name }}-win-x64.zip
+
+
+    # ------------------ LauncherPackerUploadReceiver ------------------
+    - name: Restore LauncherPackerUploadReceiver
+      run: dotnet restore LauncherPackerUploadReceiver/LauncherPackerUploadReceiver.csproj
+
+    - name: Publish LauncherPackerUploadReceiver (win-x64)
+      run: dotnet publish LauncherPackerUploadReceiver/LauncherPackerUploadReceiver.csproj -c ${{ matrix.configuration }} -o publish/LauncherPackerUploadReceiver/win-x64 -r win-x64 --self-contained true
+
+    - name: Publish LauncherPackerUploadReceiver (linux-x64)
+      run: dotnet publish LauncherPackerUploadReceiver/LauncherPackerUploadReceiver.csproj -c ${{ matrix.configuration }} -o publish/LauncherPackerUploadReceiver/linux-x64 -r linux-x64 --self-contained true
+
+    - name: Zip LauncherPackerUploadReceiver
+      run: |
+        Compress-Archive -Path publish/LauncherPackerUploadReceiver/win-x64/* -DestinationPath LauncherPackerUploadReceiver-${{ github.ref_name }}-win-x64.zip
+        Compress-Archive -Path publish/LauncherPackerUploadReceiver/linux-x64/* -DestinationPath LauncherPackerUploadReceiver-${{ github.ref_name }}-linux-x64.zip
+
+
+    # ------------------ Release ------------------
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        files: NHLauncher-${{ github.ref_name }}.zip
+        generate_release_notes: true  # ✅ 自动生成 Release Notes
+        files: |
+          NHLauncher-${{ github.ref_name }}-win-x64.zip
+          LauncherPacker-${{ github.ref_name }}-win-x64.zip
+          LauncherPackerUploadReceiver-${{ github.ref_name }}-win-x64.zip
+          LauncherPackerUploadReceiver-${{ github.ref_name }}-linux-x64.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
