@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LauncherHotupdate", "Launch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LauncherPacker", "LauncherPacker\LauncherPacker.csproj", "{C4CE95AE-D97C-6B36-6058-04C8B57897BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LauncherPakcerUploadReceiver", "LauncherPakcerUploadReceiver\LauncherPakcerUploadReceiver.csproj", "{0E558EF9-E8B8-8B4E-DD9D-703F5C585D55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LauncherPackerUploadReceiver", "LauncherPackerUploadReceiver\LauncherPackerUploadReceiver.csproj", "{24CD6226-7C2E-ED2B-48ED-B718F76C6D18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,10 +64,10 @@ Global
 		{C4CE95AE-D97C-6B36-6058-04C8B57897BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4CE95AE-D97C-6B36-6058-04C8B57897BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4CE95AE-D97C-6B36-6058-04C8B57897BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0E558EF9-E8B8-8B4E-DD9D-703F5C585D55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E558EF9-E8B8-8B4E-DD9D-703F5C585D55}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E558EF9-E8B8-8B4E-DD9D-703F5C585D55}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E558EF9-E8B8-8B4E-DD9D-703F5C585D55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24CD6226-7C2E-ED2B-48ED-B718F76C6D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24CD6226-7C2E-ED2B-48ED-B718F76C6D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24CD6226-7C2E-ED2B-48ED-B718F76C6D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24CD6226-7C2E-ED2B-48ED-B718F76C6D18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

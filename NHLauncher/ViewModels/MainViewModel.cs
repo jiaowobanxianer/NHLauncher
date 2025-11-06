@@ -233,6 +233,10 @@ namespace NHLauncher.ViewModels
                 'c' => "下载完成！",
                 _ => DownloadText
             };
+            if (command != 'c' && command != 'd' && command != 's')
+            {
+                LogMessages.Add($"未知下载命令: {commandFile}");
+            }
         }
 
         public async void CheckUpdate()

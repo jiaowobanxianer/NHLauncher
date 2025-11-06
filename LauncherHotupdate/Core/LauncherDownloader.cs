@@ -208,7 +208,9 @@ namespace LauncherHotupdate.Core
                         current += bytesRead;
                         progress?.Report((double)(downloaded + current) / totalSize * 100);
                     }
-
+                    await fs.FlushAsync(token);
+                    await fs.DisposeAsync();
+                    await stream.DisposeAsync();
                     MoveToTargetFile(tempFile, localFile);
                 }
                 catch (Exception ex)
