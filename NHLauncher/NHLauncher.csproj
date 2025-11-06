@@ -32,15 +32,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="LauncherHotupdate">
-		  <HintPath>..\LauncherHotupdate.dll</HintPath>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>Dependancies\Newtonsoft.Json.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<AvaloniaResource Update="Assets\LoginBG\合成 1_00004.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</AvaloniaResource>
@@ -744,6 +735,10 @@
 
 	<ItemGroup>
 	  <AvaloniaResource Remove="Assets\avalonia-logo.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\LauncherHotupdate\LauncherHotupdate.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
