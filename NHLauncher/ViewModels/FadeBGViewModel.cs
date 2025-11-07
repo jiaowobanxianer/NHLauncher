@@ -24,7 +24,7 @@ namespace NHLauncher.ViewModels
                 imageUris = GenerateImageUris(
                     "avares://NHLauncher/Assets/LoginBG/",
                     "合成 1_",
-                    4, 237,
+                    0, 239,
                     ".png");
             }
 

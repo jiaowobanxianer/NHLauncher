@@ -32,6 +32,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00000.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00001.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00002.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00003.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
 		<AvaloniaResource Update="Assets\LoginBG\合成 1_00004.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</AvaloniaResource>
@@ -730,6 +742,15 @@
 		</AvaloniaResource>
 		<AvaloniaResource Update="Assets\LoginBG\合成 1_00236.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00237.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00238.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Update="Assets\LoginBG\合成 1_00239.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</AvaloniaResource>
 	</ItemGroup>
 
