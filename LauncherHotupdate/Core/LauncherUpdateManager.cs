@@ -13,14 +13,13 @@ namespace LauncherHotupdate.Core
     public class LauncherUpdateManager
     {
         private readonly HttpClient _httpClient;
-        public HttpClient HttpClient => _httpClient;
-
         private readonly CookieContainer _cookieContainer;
         private readonly Uri _endpoint;
-        public string Endpoint => _endpoint.ToString();
         private readonly string _authFilePath;
+        private static readonly string endpointSaveFile = Path.Combine(AppContext.BaseDirectory, "launcher_endpoint.txt");
 
-        private static string endpointSaveFile = Path.Combine(AppContext.BaseDirectory, "launcher_endpoint.txt");
+        public HttpClient HttpClient => _httpClient;
+        public string Endpoint => _endpoint.ToString();
 
         public LauncherUpdateManager()
         {
@@ -31,52 +30,34 @@ namespace LauncherHotupdate.Core
 
             _cookieContainer = new CookieContainer();
             var handler = new HttpClientHandler { CookieContainer = _cookieContainer, UseCookies = true };
+            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(5) };
 
-            _httpClient = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromMinutes(5) // 默认下载/更新超时
-            };
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NHLauncher");
+            Directory.CreateDirectory(appData);
+            _authFilePath = Path.Combine(appData, "auth.json");
 
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var dir = Path.Combine(appData, "NHLauncher");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            _authFilePath = Path.Combine(dir, "auth.json");
-
-            // 读取 cookie
+            // 初始化 Cookie
             var authData = LoadAuthData();
             if (!string.IsNullOrEmpty(authData?.Token))
-            {
-                _cookieContainer.Add(new Cookie("LauncherAuth", authData.Token)
-                {
-                    Domain = _endpoint.Host,
-                    Path = "/"
-                });
-            }
+                _cookieContainer.Add(new Cookie("LauncherAuth", authData.Token) { Domain = _endpoint.Host, Path = "/" });
         }
+
         #region 登录 / 登出 / 验证
 
-        public async Task<(string?, string?)> LoginAsync(string userName, string password)
+        public async Task<(string? error, string? token)> LoginAsync(string userName, string password)
         {
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
                 return ("非法的用户名或密码", null);
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // 登录短超时
-
             try
             {
-                var form = new MultipartFormDataContent
-                {
-                    { new StringContent("login"), "cmd" },
-                    { new StringContent(userName), "userName" },
-                    { new StringContent(PasswordHelper.HashPasswordClient(password)), "password" }
-                };
-
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var form = BuildForm("login", ("userName", userName), ("password", PasswordHelper.HashPasswordClient(password)));
                 var resp = await _httpClient.PostAsync(_endpoint, form, cts.Token);
                 var content = await resp.Content.ReadAsStringAsync();
+
                 if (!resp.IsSuccessStatusCode)
-                    return ($"登录失败，服务器返回状态码 {resp.StatusCode}, Content:{content}", null);
+                    return ($"登录失败，状态码 {resp.StatusCode}, 内容: {content}", null);
 
                 var cookie = GetCookieFromContainer() ?? TryParseCookie(resp);
                 if (!string.IsNullOrEmpty(cookie))
@@ -84,159 +65,98 @@ namespace LauncherHotupdate.Core
                     SaveAuthData(userName, cookie);
                     return (null, cookie);
                 }
-
                 return ("登录失败，未收到认证信息", null);
             }
-            catch (TaskCanceledException)
-            {
-                Console.WriteLine("Login请求超时（服务未启动或网络问题）");
-                return ("登录请求超时（服务未启动或网络问题）", null);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Login异常：" + ex);
-                return ($"登录异常：{ex.Message}", null);
-            }
+            catch (TaskCanceledException) { return ("登录请求超时（服务未启动或网络问题）", null); }
+            catch (Exception ex) { return ($"登录异常：{ex.Message}", null); }
         }
 
-        public (string?, string?) Login(string userName, string password)
+        public (string? error, string? token) Login(string userName, string password)
             => LoginAsync(userName, password).GetAwaiter().GetResult();
 
         public async Task<string> LogoutAsync()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // Logout短超时
             var authData = LoadAuthData();
             if (!string.IsNullOrEmpty(authData?.Token))
-            {
-                _httpClient.DefaultRequestHeaders.Remove("Cookie");
-                _httpClient.DefaultRequestHeaders.Add("Cookie", $"LauncherAuth={authData.Token}");
-            }
+                SetAuthCookie(authData.Token);
 
             try
             {
-                var form = new MultipartFormDataContent
-                {
-                    { new StringContent("logout"), "cmd" }
-                };
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var form = BuildForm("logout");
                 var resp = await _httpClient.PostAsync(_endpoint, form, cts.Token);
                 var content = await resp.Content.ReadAsStringAsync();
                 if (!resp.IsSuccessStatusCode)
-                    return ($"登录失败，服务器返回状态码 {resp.StatusCode}, Content:{content}");
+                    return $"Logout失败，状态码 {resp.StatusCode}, 内容: {content}";
             }
-            catch (TaskCanceledException)
-            {
-                return "Logout请求超时";
-            }
-            catch (Exception ex)
-            {
-                return "Logout异常：" + ex;
-            }
-            finally
-            {
-                DeleteCookie();
-            }
+            catch (TaskCanceledException) { return "Logout请求超时"; }
+            catch (Exception ex) { return $"Logout异常：{ex.Message}"; }
+            finally { DeleteAuthData(); }
+
             return "成功";
         }
 
         public void Logout() => LogoutAsync().GetAwaiter().GetResult();
 
-        public async Task<(bool, string?)> IsLoggedIn()
+        public async Task<(bool isLoggedIn, string? userName)> IsLoggedIn()
         {
             var authData = LoadAuthData();
-            if (string.IsNullOrEmpty(authData?.Token))
-                return (false, null);
-
-            try
-            {
-               return  await VerifyAsync();
-            }
-            catch
-            {
-                return (false, null);
-            }
+            if (string.IsNullOrEmpty(authData?.Token)) return (false, null);
+            try { return await VerifyAsync(); }
+            catch { return (false, null); }
         }
 
-        public async Task<(bool,string?)> VerifyAsync()
+        public async Task<(bool, string?)> VerifyAsync()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // Verify短超时
-
             var authData = LoadAuthData();
-            if (string.IsNullOrEmpty(authData?.Token))
-                return (false,null);
+            if (string.IsNullOrEmpty(authData?.Token)) return (false, null);
 
-            _httpClient.DefaultRequestHeaders.Remove("Cookie");
-            _httpClient.DefaultRequestHeaders.Add("Cookie", $"LauncherAuth={authData.Token}");
-
+            SetAuthCookie(authData.Token);
             try
             {
-                var form = new MultipartFormDataContent
-                {
-                    { new StringContent("verify"), "cmd" }
-                };
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var form = BuildForm("verify");
                 var resp = await _httpClient.PostAsync(_endpoint, form, cts.Token);
-                return (resp.IsSuccessStatusCode,authData.UserName);
+                return (resp.IsSuccessStatusCode, authData.UserName);
             }
-            catch (TaskCanceledException)
-            {
-                Console.WriteLine("Verify请求超时");
-                return (false, null);
-            }
-            catch
-            {
-                return (false, null);
-            }
+            catch { return (false, null); }
         }
+
         public async Task<(string? error, List<Project>? projects)> GetProjectsAsync()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // 短超时
             var authData = LoadAuthData();
-            if (string.IsNullOrEmpty(authData?.Token))
-                return ("未登录或登录信息丢失", null);
+            if (string.IsNullOrEmpty(authData?.Token)) return ("未登录或登录信息丢失", null);
 
-            _httpClient.DefaultRequestHeaders.Remove("Cookie");
-            _httpClient.DefaultRequestHeaders.Add("Cookie", $"LauncherAuth={authData.Token}");
-
+            SetAuthCookie(authData.Token);
             try
             {
-                var form = new MultipartFormDataContent
-        {
-            { new StringContent("getprojects"), "cmd" }
-        };
-
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var form = BuildForm("getprojects");
                 var resp = await _httpClient.PostAsync(_endpoint, form, cts.Token);
-                if (!resp.IsSuccessStatusCode)
-                {
-                    return ($"获取项目失败：{resp.StatusCode}", null);
-                }
+
+                if (!resp.IsSuccessStatusCode) return ($"获取项目失败：{resp.StatusCode}", null);
 
                 var json = await resp.Content.ReadAsStringAsync();
-                var projects = JsonConvert.DeserializeObject<ProjectWrapper>(json);
-                return (null, projects?.Projects ?? new List<Project>());
+                var wrapper = JsonConvert.DeserializeObject<ProjectWrapper>(json);
+                return (null, wrapper?.Projects ?? new List<Project>());
             }
-            catch (TaskCanceledException)
-            {
-                return ("请求超时（服务未启动或网络异常）", null);
-            }
-            catch (Exception ex)
-            {
-                return ($"异常：{ex.Message}", null);
-            }
+            catch (TaskCanceledException) { return ("请求超时（服务未启动或网络异常）", null); }
+            catch (Exception ex) { return ($"异常：{ex.Message}", null); }
         }
 
-        private class ProjectWrapper
-        {
-            public string? message;
-            public List<Project>? Projects;
-        }
+        private class ProjectWrapper { public string? message; public List<Project>? Projects; }
+
         #endregion
 
-        #region 文件存储逻辑
+        #region 文件存储 / Auth管理
 
         private class AuthData
         {
             public string UserName = "";
-            public string Token;
+            public string Token = "";
             public DateTime SaveTimeUtc;
+
+            public AuthData() { }
             public AuthData(string userName, string token, DateTime saveTimeUtc)
             {
                 UserName = userName;
@@ -253,22 +173,12 @@ namespace LauncherHotupdate.Core
 
         private AuthData? LoadAuthData()
         {
-            if (!File.Exists(_authFilePath))
-                return null;
-
-            try
-            {
-                var json = File.ReadAllText(_authFilePath);
-                var data = JsonConvert.DeserializeObject<AuthData>(json);
-                return data;
-            }
-            catch
-            {
-                return null;
-            }
+            if (!File.Exists(_authFilePath)) return null;
+            try { return JsonConvert.DeserializeObject<AuthData>(File.ReadAllText(_authFilePath)); }
+            catch { return null; }
         }
 
-        private void DeleteCookie()
+        private void DeleteAuthData()
         {
             if (File.Exists(_authFilePath))
             {
@@ -278,19 +188,30 @@ namespace LauncherHotupdate.Core
 
         #endregion
 
-        #region 工具函数
+        #region 工具 / 私有方法
+
+        private MultipartFormDataContent BuildForm(string cmd, params (string name, string value)[] fields)
+        {
+            var form = new MultipartFormDataContent { { new StringContent(cmd), "cmd" } };
+            foreach (var (name, value) in fields)
+                form.Add(new StringContent(value), name);
+            return form;
+        }
+
+        private void SetAuthCookie(string token)
+        {
+            _httpClient.DefaultRequestHeaders.Remove("Cookie");
+            _httpClient.DefaultRequestHeaders.Add("Cookie", $"LauncherAuth={token}");
+        }
 
         private string? GetCookieFromContainer()
         {
             try
             {
                 var uri = new UriBuilder(_endpoint.Scheme, _endpoint.Host).Uri;
-                var cookies = _cookieContainer.GetCookies(uri);
-                foreach (Cookie c in cookies)
-                {
+                foreach (Cookie c in _cookieContainer.GetCookies(uri))
                     if (c.Name.Equals("LauncherAuth", StringComparison.OrdinalIgnoreCase))
                         return c.Value;
-                }
             }
             catch { }
             return null;

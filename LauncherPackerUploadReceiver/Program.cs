@@ -1,10 +1,8 @@
-
+using LauncherPackerUploadReceiver.Services;
 using LauncherPakcerUploadReceiver.Controllers;
 using LauncherPakcerUploadReceiver.Data;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace LauncherPakcerUploadReceiver
 {
@@ -28,7 +26,7 @@ namespace LauncherPakcerUploadReceiver
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddHostedService<Services.SessionCleanupService>();
+            builder.Services.AddHostedService<SessionCleanupService>();
 
             builder.Services.AddSwaggerGen();
             builder.Services.AddCors(p => p.AddDefaultPolicy(b => b.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));

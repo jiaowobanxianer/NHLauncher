@@ -43,7 +43,6 @@ namespace NHLauncher.ViewModels
         public event Action<string>? OnError;
         public event Action? OnUpdate;
         public event Action? OnStart;
-        public event Action<string>? OnButtonChanged;
 
         private UserControl? owner;
         private SettingWindow? currrentSettingWindow = null;
@@ -172,9 +171,8 @@ namespace NHLauncher.ViewModels
                 Downloading = true;
                 var updater = new LauncherUpdater(setting!.Setting, manager);
                 await updater.UpdateAllAsync(new ProgressReport(this), DownloadCallback);
-                Downloading = false;
                 LogMessages.Add("修复完成，点击启动按钮启动。");
-                UpdateButtonState(setting);
+                _ = UpdateButtonState(setting);
             }
             catch (Exception ex)
             {
@@ -193,7 +191,7 @@ namespace NHLauncher.ViewModels
                 var current = Settings[newValue];
                 Title = current.ProjectId;
                 ImgAvatar = current.AppIcon;
-                UpdateButtonState(current);
+                _ = UpdateButtonState(current);
             }
         }
         public async Task CheckUpdate()
@@ -211,19 +209,16 @@ namespace NHLauncher.ViewModels
                 if (!File.Exists(localFile))
                 {
                     CurrentButtonState = LauncherButtonState.Download;
-                    OnButtonChanged?.Invoke("下载");
                     return;
                 }
                 if (hasUpdate)
                 {
                     CurrentButtonState = LauncherButtonState.Update;
-                    OnButtonChanged?.Invoke("更新");
                 }
                 else
                 {
 
                     CurrentButtonState = LauncherButtonState.Launch;
-                    OnButtonChanged?.Invoke("启动");
                 }
             }
             catch (Exception ex)
@@ -244,13 +239,11 @@ namespace NHLauncher.ViewModels
                         Downloading = true;
                         var updater1 = new LauncherUpdater(current.Setting, manager);
                         await updater1.UpdateAllAsync(new ProgressReport(this), DownloadCallback);
-                        Downloading = false;
                         break;
                     case LauncherButtonState.Update:
                         Downloading = true;
                         var updater2 = new LauncherUpdater(current.Setting, manager);
                         await updater2.UpdateAsync(new ProgressReport(this), DownloadCallback);
-                        Downloading = false;
                         break;
                     case LauncherButtonState.Launch:
                         try
@@ -271,15 +264,19 @@ namespace NHLauncher.ViewModels
                 }
 
                 // 更新按钮状态
-                UpdateButtonState(current);
+                _ = UpdateButtonState(current);
             }
             catch (Exception ex)
             {
                 OnError?.Invoke(ex.Message);
             }
+            finally
+            {
+                Downloading = false;
+            }
         }
 
-        private async void UpdateButtonState(LauncherSettingWrapper setting)
+        private async Task UpdateButtonState(LauncherSettingWrapper setting)
         {
             string localFile = Path.Combine(AppContext.BaseDirectory, setting.Setting.LocalPath, setting.Setting.AppName)
                                 .Replace('/', Path.DirectorySeparatorChar)
@@ -288,7 +285,6 @@ namespace NHLauncher.ViewModels
             if (!File.Exists(localFile))
             {
                 CurrentButtonState = LauncherButtonState.Download;
-                OnButtonChanged?.Invoke("下载");
             }
             else
             {
@@ -299,18 +295,15 @@ namespace NHLauncher.ViewModels
                     if (hasUpdate)
                     {
                         CurrentButtonState = LauncherButtonState.Update;
-                        OnButtonChanged?.Invoke("更新");
                     }
                     else
                     {
                         CurrentButtonState = LauncherButtonState.Launch;
-                        OnButtonChanged?.Invoke("启动");
                     }
                 }
                 catch
                 {
                     CurrentButtonState = LauncherButtonState.Launch;
-                    OnButtonChanged?.Invoke("启动");
                 }
             }
         }

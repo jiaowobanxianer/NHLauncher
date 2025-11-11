@@ -40,6 +40,8 @@ namespace LauncherPacker
             CommandBindings.Add(new CommandBinding(SaveCommand, SaveProject));
 
             manager = new LauncherUpdateManager();
+            Change2Upload(null, null);
+            
         }
 
         #region 文件夹与项目操作
@@ -178,14 +180,25 @@ namespace LauncherPacker
             Uploader.Visibility = Visibility.Hidden;
         }
 
-        private void Change2Upload(object sender, RoutedEventArgs e) => ShowPanel(Uploader);
-        private void Change2Power(object sender, RoutedEventArgs e) => ShowPanel(Power);
-        private void Change2Register(object sender, RoutedEventArgs e) => ShowPanel(Register);
-
-        private void ShowPanel(UIElement panel)
+        private void Change2Upload(object? sender, RoutedEventArgs? e)
         {
             HideAll();
-            panel.Visibility = Visibility.Visible;
+            Uploader.Visibility = Visibility.Visible;
+            FuncNameText.Text = "上传";
+        }
+
+        private void Change2Power(object? sender, RoutedEventArgs? e)
+        {
+            HideAll();
+            Power.Visibility = Visibility.Visible;
+            FuncNameText.Text = "赋权";
+        }
+
+        private void Change2Register(object? sender, RoutedEventArgs? e)
+        {
+            HideAll();
+            Register.Visibility = Visibility.Visible;
+            FuncNameText.Text = "注册";
         }
 
         #endregion
