@@ -58,6 +58,8 @@
                              ToolTip="选择的文件夹路径"/>
                     <Button x:Name="SelectFolderButton" Content="选择文件夹" Grid.Column="1" Click="SelectFolderButton_Click"/>
                 </Grid>
+                <TextBlock Text="是否免费：" Margin="0,10,0,0"/>
+                <CheckBox x:Name="IsFreeCheckBox" ToolTip="勾选表示免费使用，未勾选表示需要赋权使用"/>
 
                 <TextBlock Text="远程服务器路径：" Margin="0,10,0,0"/>
                 <TextBox x:Name="RemoteURLText" TextChanged="RemoteURLText_TextChanged" ToolTip="输入远程服务器路径"/>

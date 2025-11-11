@@ -315,7 +315,10 @@ namespace LauncherPacker
         private async void Upload(object sender, RoutedEventArgs e)
         {
             if (!ValidateUpload(out string manifestPath)) return;
-
+            if(string.IsNullOrEmpty(CurrentProject.ProjectRemoteUrl) || string.IsNullOrEmpty(CurrentProject.ProjectPath))
+            {
+                MessageBox.Show("请输入远程路径和项目路径", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
+            }    
             string currentFile = "";
             try
             {
@@ -323,7 +326,7 @@ namespace LauncherPacker
 
                 var downloader = new LauncherDownloader();
                 var localManifest = downloader.LoadLocalManifest(manifestPath);
-                var remoteManifest = await downloader.LoadRemoteManifestAsync(hotUpdateApi, CurrentProject.ProjectRemoteUrl, apiKey);
+                var remoteManifest = await downloader.LoadRemoteManifestAsync(hotUpdateApi, CurrentProject.ProjectRemoteUrl!, apiKey);
 
                 var differ = localManifest?.GetDifferenceFile(remoteManifest);
                 if (differ == null || differ.Count == 0)
@@ -334,10 +337,10 @@ namespace LauncherPacker
 
                 UploadButton.IsEnabled = false;
 
-                var filesToUpload = Directory.GetFiles(CurrentProject.ProjectPath, "*.*", SearchOption.AllDirectories)
+                var filesToUpload = Directory.GetFiles(CurrentProject.ProjectPath!, "*.*", SearchOption.AllDirectories)
                     .Where(f =>
                     {
-                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath, f).Replace("\\", "___");
+                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath!, f).Replace("\\", "___");
                         return Path.GetFileName(f).Equals("manifest.json", System.StringComparison.OrdinalIgnoreCase) ||
                                differ.Any(d => d.Path.Replace("\\", "___") == relPath);
                     })
@@ -350,13 +353,14 @@ namespace LauncherPacker
                     var batchFiles = filesToUpload.Skip(batchStart).Take(batchSize).ToList();
                     using var content = new MultipartFormDataContent();
                     content.Add(new StringContent(apiKey), "apiKey");
-                    content.Add(new StringContent(CurrentProject.ProjectRemoteUrl), "targetPath");
+                    content.Add(new StringContent(CurrentProject.ProjectRemoteUrl!), "targetPath");
                     content.Add(new StringContent("Upload"), "cmd");
+                    content.Add(new StringContent((IsFreeCheckBox.IsChecked ?? false) ? "" : "123"), "isFree");
 
                     using var fileStreams = new DisposableList<FileStream>();
                     foreach (var file in batchFiles)
                     {
-                        string relativePath = Path.GetRelativePath(CurrentProject.ProjectPath, file).Replace("\\", "___");
+                        string relativePath = Path.GetRelativePath(CurrentProject.ProjectPath!, file).Replace("\\", "___");
                         currentFile = file;
                         var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                         fileStreams.Add(fs);
@@ -395,7 +399,7 @@ namespace LauncherPacker
 
         private bool ValidateUpload(out string manifestPath)
         {
-            manifestPath = Path.Combine(CurrentProject.ProjectPath, "manifest.json");
+            manifestPath = Path.Combine(CurrentProject.ProjectPath!, "manifest.json");
             if (string.IsNullOrWhiteSpace(CurrentProject.ProjectPath))
             {
                 MessageBox.Show("请先选择项目文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);

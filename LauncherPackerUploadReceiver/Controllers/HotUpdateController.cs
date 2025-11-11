@@ -28,7 +28,8 @@ namespace LauncherPakcerUploadReceiver.Controllers
             [FromForm] string? apiKey,
             [FromForm] string? userName,
             [FromForm] string? password,
-            [FromForm] string? projectNames)
+            [FromForm] string? projectNames,
+            [FromForm] string? isFree)
         {
             if (string.IsNullOrWhiteSpace(cmd))
                 return BadRequest("缺少 cmd 参数");
@@ -42,7 +43,7 @@ namespace LauncherPakcerUploadReceiver.Controllers
                 "getprojects" => await HandleGetProjectsAsync(),
                 "givepower" => await HandleGivePowerAsync(userName, projectNames, apiKey),
                 "getmanifest" => await GetProjectManifestAsync(targetPath ?? "", apiKey ?? ""),
-                "upload" => await UploadAsync(targetPath ?? "", files, apiKey),
+                "upload" => await UploadAsync(targetPath ?? "", files, apiKey, isFree ?? ""),
                 "download" => await DownloadAsync(targetPath ?? ""),
                 _ => BadRequest($"未知命令: {cmd}")
             };
@@ -199,7 +200,7 @@ namespace LauncherPakcerUploadReceiver.Controllers
             return Ok(new { message = "该项目未上传 manifest" });
         }
 
-        private async Task<IActionResult> UploadAsync(string targetPath, List<IFormFile>? files, string? apiKey)
+        private async Task<IActionResult> UploadAsync(string targetPath, List<IFormFile>? files, string? apiKey, string? isFree)
         {
             if (apiKey != _apiKey) return Unauthorized("无权限");
             if (files == null || files.Count == 0) return BadRequest("没有文件上传");
@@ -217,15 +218,22 @@ namespace LauncherPakcerUploadReceiver.Controllers
                 await file.CopyToAsync(stream);
             }
 
+            var free = string.IsNullOrEmpty(isFree);
             // 注册项目
             var project = await _db.Projects.FirstOrDefaultAsync(p => p.TargetPath == targetPath);
             if (project == null)
             {
                 var projectName = targetPath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).First();
-                project = new Project { ProjectName = projectName, TargetPath = targetPath };
+                project = new Project { ProjectName = projectName, TargetPath = targetPath, IsFreeAccess = free };
                 _db.Projects.Add(project);
-                await _db.SaveChangesAsync();
             }
+            else
+            {
+                // 如果项目已存在则允许更新是否免费
+                project.IsFreeAccess = free;
+                _db.Projects.Update(project);
+            }
+            await _db.SaveChangesAsync();
 
             float totalMB = files.Sum(f => f.Length) / 1024f / 1024f;
             return Ok(new { message = $"上传成功，共 {files.Count} 个文件，总大小 {totalMB:F2} MB", count = files.Count });
@@ -257,14 +265,38 @@ namespace LauncherPakcerUploadReceiver.Controllers
 
         private async Task<bool> IsUserAuthorizedForPathAsync(UserAccount user, string targetPath)
         {
-            if (user.AccessibleProjectIds == null || user.AccessibleProjectIds.Count == 0) return false;
+            targetPath = targetPath
+                .Replace('/', Path.DirectorySeparatorChar)
+                .Replace('\\', Path.DirectorySeparatorChar)
+                .TrimStart(Path.DirectorySeparatorChar);
+
+            // 免费项目任何人都能访问
+            var freeProjects = await _db.Projects
+                .Where(p => p.IsFreeAccess)
+                .ToListAsync();
+
+            if (freeProjects.Any(p => targetPath.StartsWith(
+                    p.TargetPath.Replace('/', Path.DirectorySeparatorChar)
+                                .Replace('\\', Path.DirectorySeparatorChar)
+                                .TrimStart(Path.DirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase)))
+                return true;
+
+            if (user.AccessibleProjectIds == null || user.AccessibleProjectIds.Count == 0)
+                return false;
 
             var projects = await _db.Projects
                 .Where(p => user.AccessibleProjectIds.Contains(p.Id))
                 .ToListAsync();
 
-            return projects.Any(p => targetPath.StartsWith(p.TargetPath, StringComparison.OrdinalIgnoreCase));
+            return projects.Any(p =>
+                targetPath.StartsWith(
+                    p.TargetPath.Replace('/', Path.DirectorySeparatorChar)
+                                .Replace('\\', Path.DirectorySeparatorChar)
+                                .TrimStart(Path.DirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase));
         }
+
 
         private static string GetPath(ref string targetPath)
         {

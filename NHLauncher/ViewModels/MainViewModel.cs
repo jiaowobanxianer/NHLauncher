@@ -213,11 +213,12 @@ namespace NHLauncher.ViewModels
                 }
                 if (hasUpdate)
                 {
+                    LogMessages.Add("检测到最新版本，是否更新？");
                     CurrentButtonState = LauncherButtonState.Update;
                 }
                 else
                 {
-
+                    LogMessages.Add("当前已是最新版本。");
                     CurrentButtonState = LauncherButtonState.Launch;
                 }
             }

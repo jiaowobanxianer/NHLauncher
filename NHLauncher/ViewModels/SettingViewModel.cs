@@ -42,9 +42,9 @@ namespace NHLauncher.ViewModels
                 var json = File.ReadAllText(SettingFile);
                 setting = JsonConvert.DeserializeObject<LauncherSetting>(json) ?? LauncherSetting.CreateInstance();
 
-                var updater = new LauncherUpdater(setting);
+                var updater = new LauncherUpdater(setting, new LauncherUpdateManager());
                 var localManifestPath = Path.Combine(AppContext.BaseDirectory, "manifest.json");
-                var local = JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(localManifestPath));
+                var local = File.Exists(localManifestPath) ? JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(localManifestPath)) : null;
                 var remote = await updater.GetRemoteManifestAsync();
                 var canUpdate = updater.HasUpdate(local!, remote!);
 
@@ -70,7 +70,7 @@ namespace NHLauncher.ViewModels
                 await updater.UpdateAsync(this, null); // this 实现 IProgress<double>
 
                 Updating = false;
-                File.Copy(Path.Combine(AppContext.BaseDirectory, setting.ManifestFile), localManifestPath,true);
+                File.Copy(Path.Combine(AppContext.BaseDirectory, setting.ManifestFile), localManifestPath, true);
                 var restartBox = MessageBoxManager.GetMessageBoxStandard(
                     "更新完成",
                     "更新已完成，是否重启程序？",

@@ -8,6 +8,7 @@ namespace Launcher.Shared
         public int Id { get; set; }
         public string ProjectName { get; set; } = string.Empty; // 游戏客户端名等
         public string TargetPath { get; set; } = string.Empty;  // 对应服务器路径
+        public bool IsFreeAccess { get; set; } = false; // 是否允许所有用户访问
     }
 
     public class ProjectAccess
