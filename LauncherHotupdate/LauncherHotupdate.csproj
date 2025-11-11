@@ -9,4 +9,8 @@
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Launcher.Shared\Launcher.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

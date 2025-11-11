@@ -15,8 +15,8 @@ public partial class MainView : UserControl
     public MainView()
     {
         InitializeComponent();
-        setting = SettingHelper.LoadOrCreateSetting();
-        var vm = new MainViewModel(this, setting);
+        //setting = SettingHelper.LoadOrCreateSetting();
+        var vm = new MainViewModel(this);
         vm.OnError += async (msg) =>
         {
             await MessageBoxManager

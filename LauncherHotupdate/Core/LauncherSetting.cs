@@ -44,10 +44,9 @@ namespace LauncherHotupdate.Core
         /// API,如果使用的是LauncherPakcerUploadReceiver则后缀为/HotUpdate
         /// </summary>
         public string API { get; set; } = "http://Hotupdate.example.com/HotUpdate";
+        public string RemotePath { get; set; } = "";
         [JsonIgnore]
-        public string RemotePath => Path.Combine(ProjectId, Platform);
-        [JsonIgnore]
-        public string LocalPath => Path.Combine("Games", ProjectId, Platform);
+        public string LocalPath => Path.Combine("Games", RemotePath).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         [JsonIgnore]
         public string ManifestFile => Path.Combine(LocalPath, "manifest.json");
         private LauncherSetting() { }

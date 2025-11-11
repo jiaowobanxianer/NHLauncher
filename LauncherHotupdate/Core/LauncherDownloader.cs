@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +32,11 @@ namespace LauncherHotupdate.Core
             };
             AppDomain.CurrentDomain.ProcessExit += (sender, e) => CancelDownloads();
         }
+        public LauncherDownloader(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) => CancelDownloads();
+        }
         /// <summary>
         /// 主动取消所有下载任务
         /// </summary>
@@ -44,21 +50,32 @@ namespace LauncherHotupdate.Core
         }
         #region Manifest 加载
 
-        public async Task<Manifest?> LoadRemoteManifestAsync(string api, string projectPath)
+        public async Task<Manifest?> LoadRemoteManifestAsync(string api, string projectPath, string apiKey = "")
         {
-            var form = new MultipartFormDataContent
+            MultipartFormDataContent form;
+            if (string.IsNullOrEmpty(apiKey))
             {
-                { new StringContent(projectPath), "targetPath" },
-                { new StringContent("getmanifest"), "cmd" }
-            };
+                form = new MultipartFormDataContent
+                {
+                    { new StringContent(projectPath), "targetPath" },
+                    { new StringContent("getmanifest"), "cmd" },
+                };
+            }
+            else
+            {
+                form = new MultipartFormDataContent
+                {
+                    { new StringContent(projectPath), "targetPath" },
+                    { new StringContent("getmanifest"), "cmd" },
+                    { new StringContent(apiKey), "apiKey" },
+                };
+            }
 
             using var request = new HttpRequestMessage(HttpMethod.Post, api) { Content = form };
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"获取 manifest 失败: {await response.Content.ReadAsStringAsync()}");
-                return null;
+                throw new Exception($"获取 manifest 失败: {await response.Content.ReadAsStringAsync()}");
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -66,9 +83,17 @@ namespace LauncherHotupdate.Core
 
             if (string.IsNullOrWhiteSpace(wrapper?.message) ||
                 wrapper.message.Contains("该项目未上传manifest"))
+            {
                 return null;
-
-            return JsonConvert.DeserializeObject<Manifest>(wrapper.message);
+            }
+            try
+            {
+                return JsonConvert.DeserializeObject<Manifest>(wrapper.message);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public Manifest? LoadLocalManifest(string path)
@@ -170,12 +195,12 @@ namespace LauncherHotupdate.Core
                 });
         }
         private async Task DownloadInternalAsync(
-    List<Manifest.FileEntry>? files,
-    string localPath,
-    IProgress<double>? progress,
-    Action<string>? callBack,
-    CancellationToken token,
-    Func<Manifest.FileEntry, Task<HttpResponseMessage>> getResponseAsync)
+        List<Manifest.FileEntry>? files,
+        string localPath,
+        IProgress<double>? progress,
+        Action<string>? callBack,
+        CancellationToken token,
+        Func<Manifest.FileEntry, Task<HttpResponseMessage>> getResponseAsync)
         {
             if (files == null || files.Count == 0)
             {

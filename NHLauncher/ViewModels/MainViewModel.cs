@@ -1,7 +1,9 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Launcher.Shared;
 using LauncherHotupdate.Core;
 using NHLauncher.Other;
 using System;
@@ -18,32 +20,49 @@ namespace NHLauncher.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+        public enum LauncherButtonState
+        {
+            Download,
+            Launch,
+            Update
+        }
+
+        [ObservableProperty] private LauncherButtonState currentButtonState;
         [ObservableProperty] private Bitmap? imgAvatar;
         [ObservableProperty] private int downloadProgress;
         [ObservableProperty] private string downloadText = "开始下载";
-        [ObservableProperty] private int currentSettingIndex;
+        [ObservableProperty] private int currentSettingIndex = -1;
         [ObservableProperty] private bool downloading;
-        [ObservableProperty] private bool canUpdate;
         [ObservableProperty] private string? title = "NHLauncher";
+        [ObservableProperty] private string? userName;
+        [ObservableProperty] private bool isLoggedIn;
 
         public ObservableCollection<string> LogMessages { get; } = new();
-        public ObservableCollection<LauncherSettingWrapper> Settings { get; }
+        public ObservableCollection<LauncherSettingWrapper> Settings { get; } = new ObservableCollection<LauncherSettingWrapper>();
 
         public event Action<string>? OnError;
         public event Action? OnUpdate;
         public event Action? OnStart;
+        public event Action<string>? OnButtonChanged;
 
         private UserControl? owner;
         private SettingWindow? currrentSettingWindow = null;
-        public MainViewModel()
-            : this(null, SettingHelper.LoadOrCreateSetting()) { }
+        private LauncherUpdateManager manager;
+
+        public ICommand LauncherButtonCommand => new RelayCommand(async () => await OnLauncherButtonClick());
+
+        public MainViewModel(UserControl? owner)
+        {
+            this.owner = owner;
+            manager = new LauncherUpdateManager();
+            Dispatcher.UIThread.InvokeAsync(InitLogin);
+            OnError += msg => LogMessages.Add(msg);
+        }
 
         public MainViewModel(UserControl? owner, List<LauncherSetting> settings)
         {
             this.owner = owner;
-            Settings = new ObservableCollection<LauncherSettingWrapper>(
-                settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, RepairSetting, OpenFolder, x))
-            );
+            Settings = new ObservableCollection<LauncherSettingWrapper>(ConvertSetting(settings));
 
             if (settings.Count > 0)
             {
@@ -52,9 +71,12 @@ namespace NHLauncher.ViewModels
                 Title = current.ProjectId;
                 ImgAvatar = current.AppIcon;
             }
-
+            manager = new LauncherUpdateManager();
             OnError += msg => LogMessages.Add(msg);
         }
+
+        private IEnumerable<LauncherSettingWrapper> ConvertSetting(List<LauncherSetting> settings)
+            => settings.ConvertAll(x => new LauncherSettingWrapper(SelectSetting, DeleteSetting, ModifySetting, RepairSetting, OpenFolder, x));
 
         private bool TryGetCurrentSetting(out LauncherSettingWrapper setting)
         {
@@ -99,11 +121,45 @@ namespace NHLauncher.ViewModels
             var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
             if (setting != null)
             {
-                var localPath = Combine(AppContext.BaseDirectory, setting.Setting.LocalPath);
+                var localPath = Combine(AppContext.BaseDirectory, setting.Setting.LocalPath)
+                                .Replace('/', Path.DirectorySeparatorChar)
+                                .Replace('\\', Path.DirectorySeparatorChar);
                 if (Directory.Exists(localPath))
                     Process.Start("explorer.exe", localPath);
                 else
                     OnError?.Invoke("应用目录不存在。");
+            }
+        }
+
+        private async Task InitLogin()
+        {
+            var loginData = await manager.IsLoggedIn();
+            if (loginData.Item1)
+            {
+                UserName = loginData.Item2 ?? "";
+                IsLoggedIn = true;
+            }
+
+            if (IsLoggedIn)
+            {
+                var projectsData = await manager.GetProjectsAsync();
+                if (projectsData.error != null)
+                {
+                    LogMessages.Add($"获取项目列表失败：{projectsData.error}");
+                    return;
+                }
+                else
+                {
+                    var projects = projectsData.projects;
+                    GenRuntimeProjects(projects);
+                }
+            }
+            else
+            {
+                foreach (var item in ConvertSetting(SettingHelper.LoadOrCreateSetting()))
+                {
+                    Settings.Add(item);
+                }
             }
         }
 
@@ -113,11 +169,12 @@ namespace NHLauncher.ViewModels
             try
             {
                 var setting = Settings.FirstOrDefault(x => x.ProjectId == projectId);
-                var downloader = new LauncherDownloader();
                 Downloading = true;
-                await new LauncherUpdater(setting!.Setting).UpdateAllAsync(new ProgressReport(this), DownloadCallback);
+                var updater = new LauncherUpdater(setting!.Setting, manager);
+                await updater.UpdateAllAsync(new ProgressReport(this), DownloadCallback);
                 Downloading = false;
                 LogMessages.Add("修复完成，点击启动按钮启动。");
+                UpdateButtonState(setting);
             }
             catch (Exception ex)
             {
@@ -128,14 +185,133 @@ namespace NHLauncher.ViewModels
                 Downloading = false;
             }
         }
+
         partial void OnCurrentSettingIndexChanged(int oldValue, int newValue)
         {
-            if (newValue >= 0 && newValue < Settings.Count)
+            if (Settings.Count > 0 && newValue >= 0 && newValue < Settings.Count)
             {
                 var current = Settings[newValue];
                 Title = current.ProjectId;
-                CanUpdate = false;
                 ImgAvatar = current.AppIcon;
+                UpdateButtonState(current);
+            }
+        }
+        public async Task CheckUpdate()
+        {
+            if (!TryGetCurrentSetting(out var current)) return;
+
+            try
+            {
+                var updater = new LauncherUpdater(current.Setting, manager);
+                bool hasUpdate = await updater.HasUpdateAsync();
+
+                string localFile = Path.Combine(AppContext.BaseDirectory, current.Setting.LocalPath, current.Setting.AppName)
+                                    .Replace('/', Path.DirectorySeparatorChar)
+                                    .Replace('\\', Path.DirectorySeparatorChar);
+                if (!File.Exists(localFile))
+                {
+                    CurrentButtonState = LauncherButtonState.Download;
+                    OnButtonChanged?.Invoke("下载");
+                    return;
+                }
+                if (hasUpdate)
+                {
+                    CurrentButtonState = LauncherButtonState.Update;
+                    OnButtonChanged?.Invoke("更新");
+                }
+                else
+                {
+
+                    CurrentButtonState = LauncherButtonState.Launch;
+                    OnButtonChanged?.Invoke("启动");
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+            }
+        }
+
+        private async Task OnLauncherButtonClick()
+        {
+            try
+            {
+                if (!TryGetCurrentSetting(out var current)) return;
+
+                switch (CurrentButtonState)
+                {
+                    case LauncherButtonState.Download:
+                        Downloading = true;
+                        var updater1 = new LauncherUpdater(current.Setting, manager);
+                        await updater1.UpdateAllAsync(new ProgressReport(this), DownloadCallback);
+                        Downloading = false;
+                        break;
+                    case LauncherButtonState.Update:
+                        Downloading = true;
+                        var updater2 = new LauncherUpdater(current.Setting, manager);
+                        await updater2.UpdateAsync(new ProgressReport(this), DownloadCallback);
+                        Downloading = false;
+                        break;
+                    case LauncherButtonState.Launch:
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = Path.Combine(current.Setting.LocalPath, current.Setting.AppName),
+                                WorkingDirectory = AppContext.BaseDirectory,
+                                UseShellExecute = true
+                            });
+                            OnStart?.Invoke();
+                        }
+                        catch (Exception ex)
+                        {
+                            OnError?.Invoke(ex.Message);
+                        }
+                        break;
+                }
+
+                // 更新按钮状态
+                UpdateButtonState(current);
+            }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(ex.Message);
+            }
+        }
+
+        private async void UpdateButtonState(LauncherSettingWrapper setting)
+        {
+            string localFile = Path.Combine(AppContext.BaseDirectory, setting.Setting.LocalPath, setting.Setting.AppName)
+                                .Replace('/', Path.DirectorySeparatorChar)
+                                .Replace('\\', Path.DirectorySeparatorChar);
+
+            if (!File.Exists(localFile))
+            {
+                CurrentButtonState = LauncherButtonState.Download;
+                OnButtonChanged?.Invoke("下载");
+            }
+            else
+            {
+                try
+                {
+                    var updater = new LauncherUpdater(setting.Setting, manager);
+                    bool hasUpdate = await updater.HasUpdateAsync();
+                    if (hasUpdate)
+                    {
+                        CurrentButtonState = LauncherButtonState.Update;
+                        OnButtonChanged?.Invoke("更新");
+                    }
+                    else
+                    {
+                        CurrentButtonState = LauncherButtonState.Launch;
+                        OnButtonChanged?.Invoke("启动");
+                    }
+                }
+                catch
+                {
+                    CurrentButtonState = LauncherButtonState.Launch;
+                    OnButtonChanged?.Invoke("启动");
+                }
             }
         }
 
@@ -151,30 +327,92 @@ namespace NHLauncher.ViewModels
             }
         }
 
-        public void StartCommand()
-        {
-            if (!TryGetCurrentSetting(out var current)) return;
-
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = Combine(current.Setting.LocalPath, current.Setting.AppName),
-                    WorkingDirectory = AppContext.BaseDirectory,
-                    UseShellExecute = true,
-                    Verb = "runas"
-                });
-                OnStart?.Invoke();
-            }
-            catch (Exception ex)
-            {
-                OnError?.Invoke(ex.Message);
-            }
-        }
         public void MinimalCommand()
         {
             owner?.GetWindow()?.Hide();
         }
+
+        public void LoginCommand()
+        {
+            var loginWindow = new LoginWindow(new LoginViewModel()
+            {
+                manager = manager,
+                OnLoginSuccess = async (account) =>
+                {
+                    try
+                    {
+                        LogMessages.Add($"欢迎回来，{account}！");
+                        UserName = account;
+                        IsLoggedIn = true;
+
+                        var (err, projects) = await manager.GetProjectsAsync();
+                        if (err != null)
+                        {
+                            LogMessages.Add($"获取项目列表失败：{err}");
+                            return;
+                        }
+
+                        bool flowControl = GenRuntimeProjects(projects);
+                        if (!flowControl) return;
+                    }
+                    catch (Exception ex)
+                    {
+                        OnError?.Invoke($"加载项目时出错：{ex.Message}");
+                    }
+                }
+            });
+
+            loginWindow.Show();
+        }
+
+        private bool GenRuntimeProjects(List<Project>? projects, bool clearLoacal = false)
+        {
+            if (clearLoacal)
+                Settings?.Clear();
+            if (projects == null || projects.Count == 0) return false;
+
+            foreach (var p in projects)
+            {
+                if (Settings?.Any(x => x.ProjectId == p.ProjectName) ?? false)
+                    continue;
+
+                var setting = LauncherSetting.CreateInstance();
+                setting.ProjectId = p.ProjectName;
+                setting.API = manager.Endpoint;
+                setting.RemotePath = p.TargetPath;
+                setting.UseCdn = false;
+
+                Settings?.Add(new LauncherSettingWrapper(
+                    SelectSetting,
+                    DeleteSetting,
+                    ModifySetting,
+                    RepairSetting,
+                    OpenFolder,
+                    setting
+                ));
+                SettingHelper.SaveSetting(Settings!);
+            }
+
+            if (Settings?.Count > 0)
+                CurrentSettingIndex = 0;
+
+            return true;
+        }
+
+        public async Task LogoutCommand()
+        {
+            var str = await manager.LogoutAsync();
+            if (str != "成功")
+            {
+                OnError?.Invoke(str);
+            }
+            else
+            {
+                UserName = "";
+                IsLoggedIn = false;
+            }
+        }
+
         public void SetCommand()
         {
             if (currrentSettingWindow != null && currrentSettingWindow.IsVisible)
@@ -189,36 +427,10 @@ namespace NHLauncher.ViewModels
                 currrentSettingWindow.Show();
             }
         }
+
         public void CloseCommand()
         {
             Environment.Exit(10010);
-        }
-        public async void UpdateCommand()
-        {
-            if (!TryGetCurrentSetting(out var current)) return;
-            if (Downloading) return;
-
-            try
-            {
-                Downloading = true;
-                OnUpdate?.Invoke();
-                LogMessages.Add("开始下载更新...");
-
-                var updater = new LauncherUpdater(current.Setting);
-                await updater.UpdateAsync(new ProgressReport(this), DownloadCallback);
-
-                LogMessages.Add("更新完成，点击启动按钮启动。");
-                CheckUpdate();
-            }
-            catch (Exception ex)
-            {
-                OnError?.Invoke(ex.Message);
-                DownloadText = "下载出错，请查看日志并反馈给管理员！";
-            }
-            finally
-            {
-                Downloading = false;
-            }
         }
 
         private void DownloadCallback(string commandFile)
@@ -235,33 +447,9 @@ namespace NHLauncher.ViewModels
                 'c' => "下载完成！",
                 _ => DownloadText
             };
+
             if (command != 'c' && command != 'd' && command != 's')
-            {
                 LogMessages.Add($"未知下载命令: {commandFile}");
-            }
-        }
-
-        public async void CheckUpdate()
-        {
-            if (!TryGetCurrentSetting(out var current)) return;
-
-            try
-            {
-                var updater = new LauncherUpdater(current.Setting);
-                CanUpdate = await updater.HasUpdateAsync();
-
-                string log = CanUpdate
-                    ? "检测到新版本，点击更新按钮进行更新。"
-                    : (await updater.GetRemoteManifestAsync() == null
-                        ? "当前应用无远程版本，请检查 ProjectID 是否正确。"
-                        : "当前已是最新版本。");
-
-                LogMessages.Add(log);
-            }
-            catch (Exception ex)
-            {
-                OnError?.Invoke(ex.Message);
-            }
         }
 
         public class ProgressReport : IProgress<double>

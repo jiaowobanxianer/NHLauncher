@@ -1,49 +1,49 @@
-﻿using LauncherHotupdate.Core;
+﻿using Launcher.Shared;
+using LauncherHotupdate.Core;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace LauncherPacker
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public static readonly RoutedCommand SaveCommand = new RoutedCommand();
-        public bool upLoading = false;
+        private LauncherUpdateManager manager;
+        public PackerProject CurrentProject;
+        public PackerProject? LoadedProject { get; set; }
+        private bool upLoading = false;
+
         private static readonly HttpClient httpClient = new HttpClient()
         {
             MaxResponseContentBufferSize = 1024L * 1024L * 1024L,
             Timeout = System.TimeSpan.FromMinutes(10)
         };
-        private static readonly int batchSize = 1;
+
+        private const int batchSize = 1;
+
         public MainWindow()
         {
             InitializeComponent();
-
             CurrentProject = new PackerProject();
             LauncherPackerSetting.GetPackerSetting();
-            // 创建保存快捷键绑定
-            KeyBinding saveBinding = new KeyBinding(
-                SaveCommand,
-                new KeyGesture(Key.S, ModifierKeys.Control)
-            );
-            InputBindings.Add(saveBinding);
 
-            // 绑定命令到 SaveProject 方法
+            // 快捷键绑定
+            InputBindings.Add(new KeyBinding(SaveCommand, new KeyGesture(Key.S, ModifierKeys.Control)));
             CommandBindings.Add(new CommandBinding(SaveCommand, SaveProject));
-        }
-        public PackerProject CurrentProject;
-        public PackerProject? LoadedProject { get; set; }
 
-        // 按钮点击事件处理方法，用于触发文件夹选择
+            manager = new LauncherUpdateManager();
+        }
+
+        #region 文件夹与项目操作
+
         private void SelectFolderButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -51,19 +51,17 @@ namespace LauncherPacker
                 var dialog = new OpenFolderDialog
                 {
                     Title = "请选择文件夹",
-                    Multiselect = false // 不允许选择多个文件夹
+                    Multiselect = false
                 };
 
-                bool? result = dialog.ShowDialog();
-
-                if (result == true)
+                if (dialog.ShowDialog() == true)
                 {
                     FolderPathTextBox.Text = dialog.FolderName;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"选择文件夹时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("选择文件夹时出错", ex);
             }
         }
 
@@ -71,14 +69,8 @@ namespace LauncherPacker
         {
             try
             {
-                if (CheckUnsavedChanges())
-                {
-                    var res = MessageBox.Show("当前有未保存的更改，是否继续？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (res == MessageBoxResult.No)
-                    {
-                        return;
-                    }
-                }
+                if (CheckUnsavedChanges() && MessageBox.Show("当前有未保存的更改，是否继续？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    return;
 
                 if (string.IsNullOrWhiteSpace(FolderPathTextBox.Text))
                 {
@@ -90,42 +82,38 @@ namespace LauncherPacker
                 {
                     Title = "保存Packer项目文件",
                     Filter = "Packer Project Files (*.packerproj)|*.packerproj",
-                    FileName = "NewProject.packerproj",
+                    FileName = "NewProject.packerproj"
                 };
 
-                bool? result = dialog.ShowDialog();
-
-                if (result == true)
+                if (dialog.ShowDialog() == true)
                 {
                     CurrentProject.PackerProjectFilePath = dialog.FileName;
                     File.WriteAllText(dialog.FileName, JsonConvert.SerializeObject(CurrentProject));
                     MessageBox.Show("项目已成功创建并保存。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadProject(CurrentProject);
                 }
-                LoadProject(CurrentProject);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"创建项目时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("创建项目时出错", ex);
             }
         }
 
         private bool CheckUnsavedChanges()
         {
-            if (LoadedProject == null)
-            {
-                return false;
-            }
-
-            return LoadedProject.ProjectPath != CurrentProject.ProjectPath ||
-                   LoadedProject.ProjectRemoteUrl != CurrentProject.ProjectRemoteUrl;
+            return LoadedProject != null &&
+                   (LoadedProject.ProjectPath != CurrentProject.ProjectPath ||
+                    LoadedProject.ProjectRemoteUrl != CurrentProject.ProjectRemoteUrl);
         }
+
         private void LoadProject(PackerProject project)
         {
             CurrentProject = project;
             LoadedProject = project;
-            FolderPathTextBox.Text = CurrentProject.ProjectPath;
-            RemoteURLText.Text = CurrentProject.ProjectRemoteUrl;
+            FolderPathTextBox.Text = project.ProjectPath;
+            RemoteURLText.Text = project.ProjectRemoteUrl;
         }
+
         private void OpenProject(object sender, RoutedEventArgs e)
         {
             try
@@ -133,17 +121,15 @@ namespace LauncherPacker
                 var dialog = new OpenFileDialog
                 {
                     Title = "请选择Packer项目文件",
-                    Multiselect = false, // 不允许选择多个文件夹
+                    Multiselect = false,
                     Filter = "Packer Project Files (*.packerproj)|*.packerproj"
                 };
 
-                var result = dialog.ShowDialog();
-
-                if (result == true)
+                if (dialog.ShowDialog() == true)
                 {
                     string filePath = dialog.FileName;
-                    string jsonContent = File.ReadAllText(filePath);
-                    var project = JsonConvert.DeserializeObject<PackerProject>(jsonContent) ?? throw new Exception("反序列化错误");
+                    var project = JsonConvert.DeserializeObject<PackerProject>(File.ReadAllText(filePath))
+                                  ?? throw new Exception("反序列化错误");
                     project.PackerProjectFilePath = filePath;
                     LoadProject(project);
                     MessageBox.Show("项目已成功打开。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -151,7 +137,7 @@ namespace LauncherPacker
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"打开项目文件时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("打开项目文件时出错", ex);
             }
         }
 
@@ -177,27 +163,129 @@ namespace LauncherPacker
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"保存项目时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("保存项目时出错", ex);
             }
         }
 
-        private void GenerateManifestButton_Click(object sender, RoutedEventArgs e)
-        {
-            string folderPath = FolderPathTextBox.Text;
+        #endregion
 
-            if (string.IsNullOrWhiteSpace(folderPath))
+        #region 界面切换
+
+        private void HideAll()
+        {
+            Power.Visibility = Visibility.Hidden;
+            Register.Visibility = Visibility.Hidden;
+            Uploader.Visibility = Visibility.Hidden;
+        }
+
+        private void Change2Upload(object sender, RoutedEventArgs e) => ShowPanel(Uploader);
+        private void Change2Power(object sender, RoutedEventArgs e) => ShowPanel(Power);
+        private void Change2Register(object sender, RoutedEventArgs e) => ShowPanel(Register);
+
+        private void ShowPanel(UIElement panel)
+        {
+            HideAll();
+            panel.Visibility = Visibility.Visible;
+        }
+
+        #endregion
+
+        #region 用户操作 (注册/授权)
+
+        private async void GivePower(object sender, RoutedEventArgs e)
+        {
+            string hotUpdateApi, apiKey;
+            GetConfig(out hotUpdateApi, out apiKey);
+
+            var projectNames = ProjectNameText.Text?.Trim();
+            var userName = UserNameText.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(projectNames) || string.IsNullOrWhiteSpace(userName))
             {
-                MessageBox.Show("请先选择一个文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("用户名或项目名不能为空！");
+                return;
             }
 
+            var form = new MultipartFormDataContent
+            {
+                { new StringContent("givepower"), "cmd" },
+                { new StringContent(userName), "userName" },
+                { new StringContent(projectNames), "projectNames" },
+                { new StringContent(apiKey), "apiKey" }
+            };
+
+            await SendPostRequest(hotUpdateApi, form, $"成功给用户 {userName} 添加项目 {projectNames}");
+        }
+
+        private async void RegisterCommand(object sender, RoutedEventArgs e)
+        {
+            string hotUpdateApi, apiKey;
+            GetConfig(out hotUpdateApi, out apiKey);
+
+            var userName = UserNameRegisterText.Text?.Trim();
+            var password = PasswordText?.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("用户名或密码不能为空！");
+                return;
+            }
+
+            var clientHash = PasswordHelper.HashPasswordClient(password);
+
+            var form = new MultipartFormDataContent
+            {
+                { new StringContent("register"), "cmd" },
+                { new StringContent(userName), "userName" },
+                { new StringContent(clientHash), "password" },
+                { new StringContent(apiKey), "apiKey" }
+            };
+
+            await SendPostRequest(hotUpdateApi, form, $"注册成功！用户名：{userName}");
+        }
+
+        private async Task SendPostRequest(string url, MultipartFormDataContent form, string successMessage)
+        {
             try
             {
-                ManifestGenerator.GenerateManifest(folderPath, Path.Combine(folderPath, "manifest.json"));
+                var response = await httpClient.PostAsync(url, form);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(successMessage);
+                }
+                else
+                {
+                    MessageBox.Show($"操作失败：{content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowError("请求异常", ex);
+            }
+        }
+
+        #endregion
+
+        #region Manifest & Upload
+
+        private void GenerateManifestButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(FolderPathTextBox.Text))
+                {
+                    MessageBox.Show("请先选择一个文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                ManifestGenerator.GenerateManifest(FolderPathTextBox.Text, Path.Combine(FolderPathTextBox.Text, "manifest.json"));
                 MessageBox.Show("清单已成功生成。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"生成清单时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("生成清单时出错", ex);
             }
         }
 
@@ -210,116 +298,81 @@ namespace LauncherPacker
         {
             CurrentProject.ProjectRemoteUrl = RemoteURLText.Text;
         }
+
         private async void Upload(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(CurrentProject.ProjectPath))
-            {
-                MessageBox.Show("请先选择项目文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            if (!ValidateUpload(out string manifestPath)) return;
 
-            if (string.IsNullOrWhiteSpace(CurrentProject.ProjectRemoteUrl))
-            {
-                MessageBox.Show("请先设置远程服务器地址。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            string manifestPath = Path.Combine(CurrentProject.ProjectPath, "manifest.json");
-            if (!File.Exists(manifestPath))
-            {
-                MessageBox.Show("manifest.json 不存在，请先生成清单。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
             string currentFile = "";
             try
             {
-                var setting = LauncherPackerSetting.GetPackerSetting();
-                string hotUpdateApi = setting?.hotUpdateApi ?? throw new Exception("配置文件中未定义 hotUpdateApi");
-                string apiKey = setting?.apiKey ?? throw new Exception("配置文件中未定义 apiKey");
+                GetConfig(out var hotUpdateApi, out var apiKey);
 
                 var downloader = new LauncherDownloader();
                 var localManifest = downloader.LoadLocalManifest(manifestPath);
-                var remoteManifest = await downloader.LoadRemoteManifestAsync(hotUpdateApi, CurrentProject.ProjectRemoteUrl);
-                var differ = localManifest?.GetDifferenceFile(remoteManifest);
+                var remoteManifest = await downloader.LoadRemoteManifestAsync(hotUpdateApi, CurrentProject.ProjectRemoteUrl, apiKey);
 
+                var differ = localManifest?.GetDifferenceFile(remoteManifest);
                 if (differ == null || differ.Count == 0)
                 {
                     MessageBox.Show("没有检测到差异文件，无需上传。", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
+
                 UploadButton.IsEnabled = false;
-                // 差异文件 + manifest
+
                 var filesToUpload = Directory.GetFiles(CurrentProject.ProjectPath, "*.*", SearchOption.AllDirectories)
                     .Where(f =>
                     {
-                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath, f)
-                                             .Replace("\\", "___").Replace("/", "___");
-                        bool isManifest = Path.GetFileName(f).Equals("manifest.json", StringComparison.OrdinalIgnoreCase);
-                        bool isDiffer = differ.Any(d => d.Path.Replace("\\", "___").Replace("/", "___") == relPath);
-                        return isManifest || isDiffer;
+                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath, f).Replace("\\", "___");
+                        return Path.GetFileName(f).Equals("manifest.json", System.StringComparison.OrdinalIgnoreCase) ||
+                               differ.Any(d => d.Path.Replace("\\", "___") == relPath);
                     })
                     .ToList();
-                var totalFiles = filesToUpload.Count;
-                var currentFileIndex = 0;
+
+                int totalFiles = filesToUpload.Count, currentFileIndex = 0;
 
                 for (int batchStart = 0; batchStart < filesToUpload.Count; batchStart += batchSize)
                 {
                     var batchFiles = filesToUpload.Skip(batchStart).Take(batchSize).ToList();
-
                     using var content = new MultipartFormDataContent();
                     content.Add(new StringContent(apiKey), "apiKey");
                     content.Add(new StringContent(CurrentProject.ProjectRemoteUrl), "targetPath");
                     content.Add(new StringContent("Upload"), "cmd");
 
-                    var fileStreams = new List<FileStream>();
-                    try
+                    using var fileStreams = new DisposableList<FileStream>();
+                    foreach (var file in batchFiles)
                     {
-                        foreach (var file in batchFiles)
-                        {
-                            string relativePath = Path.GetRelativePath(CurrentProject.ProjectPath, file)
-                                                     .Replace("\\", "___").Replace("/", "___");
-                            currentFile = file;
-                            var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                            fileStreams.Add(fs);
+                        string relativePath = Path.GetRelativePath(CurrentProject.ProjectPath, file).Replace("\\", "___");
+                        currentFile = file;
+                        var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                        fileStreams.Add(fs);
 
-                            var fileContent = new StreamContent(fs);
-                            fileContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data")
-                            {
-                                Name = "files",
-                                FileName = relativePath // 保留你的 ___ 规则
-                            };
-                            content.Add(fileContent);
-                        }
-
-                        var response = await httpClient.PostAsync(hotUpdateApi, content);
-                        string respMsg = await response.Content.ReadAsStringAsync();
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            MessageBox.Show($"文件上传失败: {response.ReasonPhrase}\n{respMsg}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        currentFileIndex += batchFiles.Count;
-                        var percent = MathF.Ceiling((float)currentFileIndex / totalFiles * 100);
-                        progressBar.Value = percent;
-                        ProgressTextBlock.Text = $"上传进度：{percent}%      文件:{currentFileIndex}/{totalFiles}";
+                        var fileContent = new StreamContent(fs);
+                        fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = "files", FileName = relativePath };
+                        content.Add(fileContent);
                     }
-                    finally
+
+                    var response = await httpClient.PostAsync(hotUpdateApi, content);
+                    string respMsg = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
                     {
-                        // 释放流
-                        foreach (var fs in fileStreams)
-                        {
-                            try { fs.Dispose(); } catch (Exception ex) { MessageBox.Show($"{ex.Message}"); }
-                        }
+                        MessageBox.Show($"文件上传失败: {response.ReasonPhrase}\n{respMsg}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
+
+                    currentFileIndex += batchFiles.Count;
+                    var percent = MathF.Ceiling((float)currentFileIndex / totalFiles * 100);
+                    progressBar.Value = percent;
+                    ProgressTextBlock.Text = $"上传进度：{percent}%      文件:{currentFileIndex}/{totalFiles}";
                 }
 
-                UploadButton.IsEnabled = true;
                 MessageBox.Show($"上传完成，总文件 {filesToUpload.Count} 个，差异文件 {differ.Count} 个。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                MessageBox.Show($"上传过程中发生错误: {ex.Message}，文件{currentFile}处出错", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                UploadButton.IsEnabled = true;
+                ShowError($"上传过程中发生错误，文件{currentFile}处出错", ex);
             }
             finally
             {
@@ -327,5 +380,55 @@ namespace LauncherPacker
             }
         }
 
+        private bool ValidateUpload(out string manifestPath)
+        {
+            manifestPath = Path.Combine(CurrentProject.ProjectPath, "manifest.json");
+            if (string.IsNullOrWhiteSpace(CurrentProject.ProjectPath))
+            {
+                MessageBox.Show("请先选择项目文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(CurrentProject.ProjectRemoteUrl))
+            {
+                MessageBox.Show("请先设置远程服务器地址。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            if (!File.Exists(manifestPath))
+            {
+                MessageBox.Show("manifest.json 不存在，请先生成清单。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region 辅助方法
+
+        private static void GetConfig(out string hotUpdateApi, out string apiKey)
+        {
+            var setting = LauncherPackerSetting.GetPackerSetting();
+            hotUpdateApi = setting?.hotUpdateApi ?? throw new System.Exception("配置文件中未定义 hotUpdateApi");
+            apiKey = setting?.apiKey ?? throw new System.Exception("配置文件中未定义 apiKey");
+        }
+
+        private static void ShowError(string message, System.Exception ex)
+        {
+            MessageBox.Show($"{message}: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private class DisposableList<T> : List<T>, System.IDisposable where T : System.IDisposable
+        {
+            public void Dispose()
+            {
+                foreach (var item in this) item.Dispose();
+                Clear();
+            }
+        }
+
+        #endregion
     }
 }

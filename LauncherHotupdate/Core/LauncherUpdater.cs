@@ -12,16 +12,27 @@ namespace LauncherHotupdate.Core
     {
         private readonly LauncherSetting _settings;
         private readonly LauncherDownloader _downloader = new LauncherDownloader();
+        private readonly LauncherUpdateManager? updateManager;
 
         public LauncherUpdater(LauncherSetting settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
+        public LauncherUpdater(LauncherSetting settings, LauncherUpdateManager updateManager)
+        {
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            this.updateManager = updateManager;
+            _downloader = new LauncherDownloader(updateManager.HttpClient);
+        }
         #region 检查更新
 
         public async Task<bool> HasUpdateAsync()
         {
+            if (!(await IsLoggedIn()))
+            {
+                throw new InvalidOperationException("请先登录。");
+            }
             var remote = await GetRemoteManifestAsync();
             if (remote == null) return false;
 
@@ -43,8 +54,17 @@ namespace LauncherHotupdate.Core
             => _downloader.Compare(remote, local);
 
         public async Task<Manifest?> GetRemoteManifestAsync()
-            => await _downloader.LoadRemoteManifestAsync(_settings.API, _settings.RemotePath);
-
+        {
+            if (!(await IsLoggedIn()))
+            {
+                throw new InvalidOperationException("请先登录。");
+            }
+            return await _downloader.LoadRemoteManifestAsync(_settings.API, _settings.RemotePath);
+        }
+        private async Task<bool> IsLoggedIn()
+        {
+            return updateManager == null || (await updateManager.IsLoggedIn()).Item1;
+        }
         #endregion
 
         #region 更新流程
@@ -52,11 +72,16 @@ namespace LauncherHotupdate.Core
         /// <summary>
         /// 自动判断来源并执行更新
         /// </summary>
-        public Task UpdateAsync(
+        public async Task UpdateAsync(
             IProgress<double>? progress = null,
             Action<string>? callBack = null,
             CancellationToken token = default)
-            => UpdateInternalAsync(progress, callBack, async () =>
+        {
+            if (!(await IsLoggedIn()))
+            {
+                throw new InvalidOperationException("请先登录。");
+            }
+            await  UpdateInternalAsync(progress, callBack, async () =>
             {
                 var remote = await GetRemoteManifestAsync();
                 if (remote == null)
@@ -68,17 +93,24 @@ namespace LauncherHotupdate.Core
             },
             () => Task.FromResult(_downloader.LoadLocalManifest(_settings.ManifestFile))
             , token);
-        public Task UpdateAllAsync(
+        }
+        public async Task UpdateAllAsync(
             IProgress<double>? progress = null,
             Action<string>? callBack = null,
             CancellationToken token = default)
-            => UpdateInternalAsync(progress, callBack,
+        {
+            if (!(await IsLoggedIn()))
+            {
+                throw new InvalidOperationException("请先登录。");
+            }
+            await UpdateInternalAsync(progress, callBack,
                 async () =>
                 {
                     return await GetRemoteManifestAsync();
                 },
                 () => Task.FromResult<Manifest?>(null)
                 , token);
+        }
 
 
         /// <summary>

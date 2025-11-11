@@ -759,6 +759,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Launcher.Shared\Launcher.Shared.csproj" />
 	  <ProjectReference Include="..\LauncherHotupdate\LauncherHotupdate.csproj" />
 	</ItemGroup>
 

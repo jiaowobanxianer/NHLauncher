@@ -1,14 +1,16 @@
 
 using LauncherPakcerUploadReceiver.Controllers;
+using LauncherPakcerUploadReceiver.Data;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
 namespace LauncherPakcerUploadReceiver
 {
     public class Program
     {
-        public static string ContentRootPath;
+        public static string? ContentRootPath;
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -19,10 +21,15 @@ namespace LauncherPakcerUploadReceiver
                 // 允许最大请求体 2GB
                 options.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024;
             });
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddDbContext<LauncherDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddHostedService<Services.SessionCleanupService>();
+
             builder.Services.AddSwaggerGen();
             builder.Services.AddCors(p => p.AddDefaultPolicy(b => b.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             builder.Services.Configure<FormOptions>(options =>
@@ -30,7 +37,7 @@ namespace LauncherPakcerUploadReceiver
                 options.MultipartBodyLengthLimit = 2_000_000_000; // 2000 MB
                 options.ValueLengthLimit = 2_000_000_000;
                 options.BufferBodyLengthLimit = 1_000_000_000;
-             
+
             });
             builder.Services.Configure<UploadSettings>(
                 builder.Configuration.GetSection("UploadSettings"));
@@ -47,8 +54,13 @@ namespace LauncherPakcerUploadReceiver
 
 
             app.MapControllers();
-            app.Urls.Add("http://0.0.0.0:5000");  // 外网可访问
+            var hostUrls = builder.Configuration.GetSection("HostSettings")["Urls"];
+            if (!string.IsNullOrWhiteSpace(hostUrls))
+            {
+                app.Urls.Add(hostUrls);
+            }
             app.Run();
+
         }
     }
 }
