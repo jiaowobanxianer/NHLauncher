@@ -16,7 +16,6 @@ namespace LauncherPacker
     public partial class MainWindow : Window
     {
         public static readonly RoutedCommand SaveCommand = new RoutedCommand();
-        private LauncherUpdateManager manager;
         public PackerProject CurrentProject;
         public PackerProject? LoadedProject { get; set; }
         private bool upLoading = false;
@@ -24,7 +23,7 @@ namespace LauncherPacker
         private static readonly HttpClient httpClient = new HttpClient()
         {
             MaxResponseContentBufferSize = 1024L * 1024L * 1024L,
-            Timeout = System.TimeSpan.FromMinutes(10)
+            Timeout = TimeSpan.FromMinutes(10)
         };
 
         private const int batchSize = 1;
@@ -39,7 +38,6 @@ namespace LauncherPacker
             InputBindings.Add(new KeyBinding(SaveCommand, new KeyGesture(Key.S, ModifierKeys.Control)));
             CommandBindings.Add(new CommandBinding(SaveCommand, SaveProject));
 
-            manager = new LauncherUpdateManager();
             Change2Upload(null, null);
             
         }
@@ -112,6 +110,7 @@ namespace LauncherPacker
         {
             CurrentProject = project;
             LoadedProject = project;
+            IsFreeCheckBox.IsChecked = project.IsFree;
             FolderPathTextBox.Text = project.ProjectPath;
             RemoteURLText.Text = project.ProjectRemoteUrl;
         }
@@ -447,5 +446,10 @@ namespace LauncherPacker
         }
 
         #endregion
+
+        private void IsFreeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CurrentProject.IsFree = IsFreeCheckBox.IsChecked ?? false;
+        }
     }
 }

@@ -1,175 +1,187 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:NHLauncher.ViewModels"
-             xmlns:views="clr-namespace:NHLauncher.Views"
-             mc:Ignorable="d"
-             d:DesignWidth="800" d:DesignHeight="400"
-             x:Class="NHLauncher.Views.MainView"
-             x:DataType="vm:MainViewModel"
-             Background="Transparent"
-             CornerRadius="10"
-             ClipToBounds="True">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:NHLauncher.ViewModels"
+			 xmlns:views="clr-namespace:NHLauncher.Views"
+			 mc:Ignorable="d"
+			 d:DesignWidth="800" d:DesignHeight="400"
+			 x:Class="NHLauncher.Views.MainView"
+			 x:DataType="vm:MainViewModel"
+			 Background="Transparent"
+			 CornerRadius="10"
+			 ClipToBounds="True">
 
-    <Design.DataContext>
-        <vm:MainViewModel/>
-    </Design.DataContext>
+	<Design.DataContext>
+		<vm:MainViewModel/>
+	</Design.DataContext>
 
-    <views:DragableBorder>
-        <Grid>
-            <views:FadeBG CornerRadius="10" ClipToBounds="True"/>
+	<views:DragableBorder>
+		<Grid>
+			<views:FadeBG CornerRadius="10" ClipToBounds="True"/>
 
-            <!-- 标题栏右侧按钮 -->
-            <!-- 左上角登录区域 -->
-            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Margin="10,5,0,0" >
-                <!-- 登录前 -->
-                <Button Foreground="#2D77E5" Background="Transparent" IsVisible="{Binding !IsLoggedIn}"
-                        Command="{Binding LoginCommand}">
-                    <TextBlock Text="登录" FontSize="14"/>
-                </Button>
+			<!-- 标题栏右侧按钮 -->
+			<!-- 左上角登录区域 -->
+			<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Margin="10,5,0,0" >
+				<!-- 登录前 -->
+				<Button Foreground="#2D77E5" Background="Transparent" IsVisible="{Binding !IsLoggedIn}"
+						Command="{Binding LoginCommand}">
+					<TextBlock Text="登录" FontSize="14"/>
+				</Button>
 
-                <!-- 登录后 -->
-                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLoggedIn}">
-                    <TextBlock Text="{Binding UserName}" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <Button Foreground="#2D77E5"  Background="Transparent" Command="{Binding LogoutCommand}">
-                        <TextBlock Text="注销" FontSize="14" />
-                    </Button>
-                </StackPanel>
-            </StackPanel>
+				<!-- 登录后 -->
+				<StackPanel Orientation="Horizontal" IsVisible="{Binding IsLoggedIn}">
+					<TextBlock Text="{Binding UserName}" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
+					<Button Foreground="#2D77E5"  Background="Transparent" Command="{Binding LogoutCommand}">
+						<TextBlock Text="注销" FontSize="14" />
+					</Button>
+				</StackPanel>
+			</StackPanel>
 
-            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,5,5,0">
-                <Button Background="Transparent" Name="BTN_Minial" Command="{Binding MinimalCommand}">
-                    <TextBlock Text="➖" FontSize="14"/>
-                </Button>
-                <Button Background="Transparent" Name="BTN_Set" Command="{Binding SetCommand}">
-                    <TextBlock Text="⚙" FontSize="14"/>
-                </Button>
-                <Button Background="Transparent" Name="BTN_Close" Command="{Binding CloseCommand}">
-                    <TextBlock Text="✖" FontSize="14"/>
-                </Button>
-            </StackPanel>
+			<StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,5,5,0">
+				<Button Background="Transparent" Name="BTN_Minial" Command="{Binding MinimalCommand}">
+					<TextBlock Text="➖" FontSize="14"/>
+				</Button>
+				<Button Background="Transparent" Name="BTN_Set" Command="{Binding SetCommand}">
+					<TextBlock Text="⚙" FontSize="14"/>
+				</Button>
+				<Button Background="Transparent" Name="BTN_Close" Command="{Binding CloseCommand}">
+					<TextBlock Text="✖" FontSize="14"/>
+				</Button>
+			</StackPanel>
 
-            <!-- 主体内容：左右布局 -->
-            <Grid Margin="20,50,20,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/> <!-- 左侧应用列表宽度 -->
-                    <ColumnDefinition Width="*"/>   <!-- 右侧内容 -->
-                </Grid.ColumnDefinitions>
+			<!-- 主体内容：左右布局 -->
+			<Grid Margin="20,50,20,20">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150"/> <!-- 左侧应用列表宽度 -->
+					<ColumnDefinition Width="*"/>   <!-- 右侧内容 -->
+				</Grid.ColumnDefinitions>
 
-                <!-- 左侧应用列表 -->
-                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Background="#11111122" Margin="0,0,10,0" Width="80" CornerRadius="20">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>   <!-- 上部空间用于居中显示应用按钮 -->
-                            <RowDefinition Height="Auto"/> <!-- 底部固定添加按钮 -->
-                        </Grid.RowDefinitions>
+				<!-- 左侧应用列表 -->
+				<ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Background="#11111122" Margin="0,0,10,0" Width="80" CornerRadius="20">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*"/>   <!-- 上部空间用于居中显示应用按钮 -->
+							<RowDefinition Height="Auto"/> <!-- 底部固定添加按钮 -->
+						</Grid.RowDefinitions>
 
-                        <!-- 上部应用列表 -->
-                        <StackPanel Grid.Row="0" VerticalAlignment="Top" Margin="0,5,0,0" HorizontalAlignment="Center">
-                            <ItemsControl ItemsSource="{Binding Settings}" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="{Binding !Downloading}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Margin="5" Padding="5" Width="60" Height="60"
-                                                Command="{Binding SelectCommand}"
-                                                Background="Transparent"
-                                                ToolTip.Tip="{Binding ProjectId}">
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Border Width="50" Height="50" CornerRadius="10" Background="#22222255" ClipToBounds="True">
-                                                    <Image Source="{Binding AppIcon}" Stretch="Fill" Width="50" Height="50" />
-                                                </Border>
-                                                <TextBlock Text="{Binding ProjectId}" FontSize="10" HorizontalAlignment="Center" Margin="0,3,0,0"/>
-                                            </StackPanel>
-                                            <Button.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="打开文件夹"
-                                                              Command="{Binding OpenFolderCommand}"/>
-                                                    <MenuItem Header="修复"
-                                                              Command="{Binding RepairCommand}"/>
-                                                    <MenuItem Header="修改"
-                                                              Command="{Binding ModifyCommand}"/>
-                                                    <MenuItem Header="删除"
-                                                              Command="{Binding DeleteCommand}"/>
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+						<!-- 上部应用列表 -->
+						<StackPanel Grid.Row="0" VerticalAlignment="Top" Margin="0,5,0,0" HorizontalAlignment="Center">
+							<ItemsControl ItemsSource="{Binding Settings}" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="{Binding !Downloading}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate>
+										<Button Margin="5" Padding="5" Width="60" Height="60"
+												Command="{Binding SelectCommand}"
+												Background="Transparent"
+												ToolTip.Tip="{Binding ProjectId}">
+											<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+												<Border Width="50" Height="50" CornerRadius="10" Background="#22222255" ClipToBounds="True">
+													<Image Source="{Binding AppIcon}" Stretch="Fill" Width="50" Height="50" />
+												</Border>
+												<TextBlock Text="{Binding ProjectId}" FontSize="10" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+											</StackPanel>
+											<Button.ContextMenu>
+												<ContextMenu>
+													<MenuItem Header="打开文件夹"
+															  Command="{Binding OpenFolderCommand}"/>
+													<MenuItem Header="修复"
+															  Command="{Binding RepairCommand}"/>
+													<MenuItem Header="修改"
+															  Command="{Binding ModifyCommand}"/>
+													<MenuItem Header="删除"
+															  Command="{Binding DeleteCommand}"/>
+												</ContextMenu>
+											</Button.ContextMenu>
+										</Button>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</StackPanel>
 
-                        <!-- 底部添加按钮 -->
-                        <Button Grid.Row="1" Content="➕添加" Margin="5" Padding="5" Width="60"
-                                Command="{Binding AddAppCommand}" HorizontalAlignment="Center"/>
-                    </Grid>
-                </ScrollViewer>
+						<!-- 底部添加按钮 -->
+						<Button Grid.Row="1" Content="➕添加" Margin="5" Padding="5" Width="60"
+								Command="{Binding AddAppCommand}" HorizontalAlignment="Center"/>
+					</Grid>
+				</ScrollViewer>
 
-                <!-- 右侧内容 -->
-                <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="100"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="100"/>
-                    </Grid.RowDefinitions>
+				<!-- 右侧内容 -->
+				<Grid Grid.Column="1">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="100"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="100"/>
+					</Grid.RowDefinitions>
 
-                    <!-- 顶部头像和标题 -->
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- 顶部头像和标题 -->
+					<Grid Grid.Row="0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Width="80" Height="80" BorderBrush="White" BorderThickness="2" CornerRadius="40" HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <Ellipse Width="76" Height="76">
-                                <Ellipse.Fill>
-                                    <ImageBrush Source="{Binding ImgAvatar}" Stretch="UniformToFill"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-                        </Border>
+						<Border Grid.Column="0" Width="80" Height="80" BorderBrush="White" BorderThickness="2" CornerRadius="40" HorizontalAlignment="Left" VerticalAlignment="Center">
+							<Ellipse Width="76" Height="76">
+								<Ellipse.Fill>
+									<ImageBrush Source="{Binding ImgAvatar}" Stretch="UniformToFill"/>
+								</Ellipse.Fill>
+							</Ellipse>
+						</Border>
 
-                        <Viewbox Grid.Column="1" Margin="10,0,10,0" Stretch="Uniform" MinWidth="100">
-                            <TextBlock Text="{Binding Title}" FontSize="48"  FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" />
-                        </Viewbox>
-                    </Grid>
+						<Viewbox Grid.Column="1" Margin="10,0,10,0" Stretch="Uniform" MinWidth="100">
+							<TextBlock Text="{Binding Title}" FontSize="48"  FontFamily="Segoe UI Semibold" FontWeight="Bold" VerticalAlignment="Center" />
+						</Viewbox>
+					</Grid>
 
-                    <!-- 中间日志 -->
-                    <Grid Grid.Row="1" Margin="40,20,40,20">
-                        <Border CornerRadius="5" Background="#50505000" MinHeight="100">
-                            <ListBox x:Name="LogListBox" Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
-                        </Border>
-                    </Grid>
+					<!-- 中间日志 -->
+					<Grid Grid.Row="1" Margin="40,20,40,20">
+						<Border CornerRadius="5" Background="#50505000" MinHeight="100">
+							<ListBox x:Name="LogListBox" Background="Transparent" AutoScrollToSelectedItem="True" ItemsSource="{Binding LogMessages}"/>
+						</Border>
+					</Grid>
 
-                    <!-- 底部操作 -->
-                    <Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+					<!-- 底部操作 -->
+					<Grid Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
 
-                        <!-- 下载进度 -->
-                        <StackPanel Orientation="Vertical" IsVisible="{Binding Downloading}">
-                            <TextBlock Text="{Binding DownloadText}" FontSize="14" HorizontalAlignment="Left" Margin="0,0,0,5"/>
-                            <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center"  ShowProgressText="True"/>
-                        </StackPanel>
+						<!-- 下载进度 -->
+						<StackPanel Orientation="Vertical" IsVisible="{Binding Downloading}">
+							<TextBlock Text="{Binding DownloadText}" FontSize="14" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+							<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" Height="30" VerticalAlignment="Center"  ShowProgressText="True"/>
+						</StackPanel>
 
-                        <!-- 统一操作按钮 -->
-                        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="50,0,0,15" HorizontalAlignment="Center">
-                            <Button Width="120" Height="60"
-                                    Command="{Binding LauncherButtonCommand}"
-                                    IsEnabled="{Binding !Downloading}"
-                                    Background="Beige"
-                                    CornerRadius="5">
-                                <TextBlock Text="{Binding CurrentButtonState, Converter={StaticResource LauncherButtonStateToTextConverter}}" 
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Button>
+						<!-- 统一操作按钮 -->
+						<StackPanel Grid.Column="1" Orientation="Vertical" Margin="50,0,0,15" HorizontalAlignment="Center">
+							<Button Width="120" Height="60"
+									Command="{Binding LauncherButtonCommand}"
+									Background="Beige"
+									CornerRadius="5">
+								<Button.IsEnabled>
+									<MultiBinding Converter="{StaticResource AndConverter}">
+										<Binding Path="!Downloading" />
+										<Binding Path="LauncherButtonEnabled" />
+									</MultiBinding>
+								</Button.IsEnabled>
+								<TextBlock Text="{Binding CurrentButtonState, Converter={StaticResource LauncherButtonStateToTextConverter}}"
+										   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Button>
 
-                            <Button Foreground="#2D77E5" HorizontalAlignment="Center" Background="Transparent" Command="{Binding CheckUpdate}" IsEnabled="{Binding !Downloading}" CornerRadius="5" Margin="0,10,0,0">
-                                检查更新
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
-    </views:DragableBorder>
+							<Button Foreground="#2D77E5" HorizontalAlignment="Center" Background="Transparent" Command="{Binding CheckUpdate}" CornerRadius="5" Margin="0,10,0,0">
+								检查更新
+								<Button.IsEnabled>
+									<MultiBinding Converter="{StaticResource AndConverter}">
+										<Binding Path="!Downloading" />
+										<Binding Path="LauncherButtonEnabled" />
+										<Binding Path="CurrentButtonState" />
+									</MultiBinding>
+								</Button.IsEnabled>
+							</Button>
+						</StackPanel>
+					</Grid>
+				</Grid>
+			</Grid>
+		</Grid>
+	</views:DragableBorder>
 </UserControl>

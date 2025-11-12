@@ -11,11 +11,9 @@ namespace NHLauncher.Views;
 
 public partial class MainView : UserControl
 {
-    private List<LauncherSetting> setting;
     public MainView()
     {
         InitializeComponent();
-        //setting = SettingHelper.LoadOrCreateSetting();
         var vm = new MainViewModel(this);
         vm.OnError += async (msg) =>
         {

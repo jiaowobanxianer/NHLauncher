@@ -1,12 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using Launcher.Shared;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using Launcher.Shared;
 
 namespace LauncherHotupdate.Core
 {
@@ -17,7 +18,32 @@ namespace LauncherHotupdate.Core
         private readonly Uri _endpoint;
         private readonly string _authFilePath;
         private static readonly string endpointSaveFile = Path.Combine(AppContext.BaseDirectory, "launcher_endpoint.txt");
-
+        public static bool HasInternet(string host = "223.5.5.5", int timeout = 2000)
+        {
+            try
+            {
+                using var ping = new Ping();
+                var reply = ping.Send(host, timeout); // Google DNS
+                return reply.Status == IPStatus.Success;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public static async Task<bool> HasInternetAsync(string host = "223.5.5.5", int timeout = 2000)
+        {
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(host, timeout);
+                return reply.Status == IPStatus.Success;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public HttpClient HttpClient => _httpClient;
         public string Endpoint => _endpoint.ToString();
 

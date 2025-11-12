@@ -12,6 +12,7 @@
 	 <Application.Resources>
     <!-- ×¢²áÈ«¾Ö Converter -->
     <other:LauncherButtonStateToTextConverter x:Key="LauncherButtonStateToTextConverter"/>
+    <other:AndConverter x:Key="AndConverter"/>
   </Application.Resources>
 	<Application.Styles>
 		<FluentTheme />

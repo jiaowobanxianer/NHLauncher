@@ -12,6 +12,7 @@ namespace LauncherPacker
     {
         public string? PackerProjectFilePath { get; set; }
         public string? ProjectPath { get; set; }
+        public bool IsFree { get; set; }
         public string? ProjectRemoteUrl { get; set; }
     }
 }

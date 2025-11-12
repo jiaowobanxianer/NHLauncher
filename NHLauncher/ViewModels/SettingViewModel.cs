@@ -29,6 +29,12 @@ namespace NHLauncher.ViewModels
         }
         public async Task CheckUpdateCommand()
         {
+            if (!await LauncherUpdateManager.HasInternetAsync())
+            {
+                var msgBox = MessageBoxManager.GetMessageBoxStandard("错误", "当前为离线模式，请检查您的网络情况。", ButtonEnum.Ok, Icon.Error);
+                await msgBox.ShowAsPopupAsync(owner!);
+                return;
+            }
             if (Updating) return;
             if (!File.Exists(SettingFile))
             {

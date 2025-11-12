@@ -36,7 +36,7 @@ namespace NHLauncher.ViewModels
         [ObservableProperty] private string? title = "NHLauncher";
         [ObservableProperty] private string? userName;
         [ObservableProperty] private bool isLoggedIn;
-
+        [ObservableProperty] private bool launcherButtonEnabled = true;
         public ObservableCollection<string> LogMessages { get; } = new();
         public ObservableCollection<LauncherSettingWrapper> Settings { get; } = new ObservableCollection<LauncherSettingWrapper>();
 
@@ -47,30 +47,11 @@ namespace NHLauncher.ViewModels
         private UserControl? owner;
         private SettingWindow? currrentSettingWindow = null;
         private LauncherUpdateManager manager;
-
-        public ICommand LauncherButtonCommand => new RelayCommand(async () => await OnLauncherButtonClick());
-
         public MainViewModel(UserControl? owner)
         {
             this.owner = owner;
             manager = new LauncherUpdateManager();
             Dispatcher.UIThread.InvokeAsync(InitLogin);
-            OnError += msg => LogMessages.Add(msg);
-        }
-
-        public MainViewModel(UserControl? owner, List<LauncherSetting> settings)
-        {
-            this.owner = owner;
-            Settings = new ObservableCollection<LauncherSettingWrapper>(ConvertSetting(settings));
-
-            if (settings.Count > 0)
-            {
-                CurrentSettingIndex = Math.Clamp(CurrentSettingIndex, 0, settings.Count - 1);
-                var current = Settings[CurrentSettingIndex];
-                Title = current.ProjectId;
-                ImgAvatar = current.AppIcon;
-            }
-            manager = new LauncherUpdateManager();
             OnError += msg => LogMessages.Add(msg);
         }
 
@@ -98,13 +79,26 @@ namespace NHLauncher.ViewModels
 
         public void DeleteSetting(string projectId)
         {
+            var currentID = "";
+            if (CurrentSettingIndex != -1 && Settings.Count > CurrentSettingIndex)
+            {
+                currentID = Settings[CurrentSettingIndex].ProjectId;
+            }
             var item = Settings.FirstOrDefault(x => x.ProjectId == projectId);
             if (item != null)
             {
                 var localPath = Combine(AppContext.BaseDirectory, item!.Setting.LocalPath);
-                Directory.Delete(localPath, true);
+                if (Directory.Exists(localPath))
+                {
+                    Directory.Delete(localPath, true);
+                }
                 Settings.Remove(item);
                 SettingHelper.SaveSetting(Settings);
+            }
+            CurrentSettingIndex = Settings.ToList().FindIndex(x => x.ProjectId == currentID);
+            if (CurrentSettingIndex < 0)
+            {
+                InitCurrentSetting();
             }
         }
 
@@ -132,13 +126,18 @@ namespace NHLauncher.ViewModels
 
         private async Task InitLogin()
         {
+            LoadLocalSettings();
+            if (!await LauncherUpdateManager.HasInternetAsync())
+            {
+                LogMessages.Add("当前无网络连接，使用离线模式。");
+                return;
+            }
             var loginData = await manager.IsLoggedIn();
             if (loginData.Item1)
             {
                 UserName = loginData.Item2 ?? "";
                 IsLoggedIn = true;
             }
-
             if (IsLoggedIn)
             {
                 var projectsData = await manager.GetProjectsAsync();
@@ -153,17 +152,23 @@ namespace NHLauncher.ViewModels
                     GenRuntimeProjects(projects);
                 }
             }
-            else
-            {
-                foreach (var item in ConvertSetting(SettingHelper.LoadOrCreateSetting()))
-                {
-                    Settings.Add(item);
-                }
-            }
         }
-
+        private void LoadLocalSettings()
+        {
+            var localSettings = SettingHelper.LoadOrCreateSetting();
+            foreach (var item in ConvertSetting(localSettings))
+            {
+                Settings.Add(item);
+            }
+            InitCurrentSetting();
+        }
         public async Task RepairSetting(string projectId)
         {
+            if (!await LauncherUpdateManager.HasInternetAsync())
+            {
+                LogMessages.Add("当前为离线模式，请检查您的网络情况。");
+                return;
+            }
             LogMessages.Add("开始修复应用...");
             try
             {
@@ -192,10 +197,22 @@ namespace NHLauncher.ViewModels
                 Title = current.ProjectId;
                 ImgAvatar = current.AppIcon;
                 _ = UpdateButtonState(current);
+                LauncherButtonEnabled = true;
+            }
+            else
+            {
+                ImgAvatar = null;
+                Title = "NHLauncher";
+                LauncherButtonEnabled = false;
             }
         }
         public async Task CheckUpdate()
         {
+            if (!await LauncherUpdateManager.HasInternetAsync())
+            {
+                LogMessages.Add("当前为离线模式，请检查您的网络情况。");
+                return;
+            }
             if (!TryGetCurrentSetting(out var current)) return;
 
             try
@@ -228,7 +245,7 @@ namespace NHLauncher.ViewModels
             }
         }
 
-        private async Task OnLauncherButtonClick()
+        public async Task LauncherButtonCommand()
         {
             try
             {
@@ -287,6 +304,10 @@ namespace NHLauncher.ViewModels
             {
                 CurrentButtonState = LauncherButtonState.Download;
             }
+            else if (!await LauncherUpdateManager.HasInternetAsync())
+            {
+                CurrentButtonState = LauncherButtonState.Launch;
+            }
             else
             {
                 try
@@ -328,6 +349,11 @@ namespace NHLauncher.ViewModels
 
         public void LoginCommand()
         {
+            if (!LauncherUpdateManager.HasInternet())
+            {
+                LogMessages.Add("当前为离线模式，请检查您的网络情况。");
+                return;
+            }
             var loginWindow = new LoginWindow(new LoginViewModel()
             {
                 manager = manager,
@@ -386,11 +412,14 @@ namespace NHLauncher.ViewModels
                 ));
                 SettingHelper.SaveSetting(Settings!);
             }
-
-            if (Settings?.Count > 0)
-                CurrentSettingIndex = 0;
+            InitCurrentSetting();
 
             return true;
+        }
+
+        private void InitCurrentSetting()
+        {
+            CurrentSettingIndex = Settings?.Count > 0 ? 0 : -1;
         }
 
         public async Task LogoutCommand()
