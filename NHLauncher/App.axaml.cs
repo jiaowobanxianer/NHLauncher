@@ -5,15 +5,20 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using NHLauncher.Other;
 using NHLauncher.ViewModels;
 using NHLauncher.Views;
 using System;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
+using System.Threading;
 namespace NHLauncher;
 
 public partial class App : Application
 {
+    private CancellationTokenSource? _pipeCts;
     private bool _isTrayIconInitialized = false;
     private TrayIcon? _trayIcon;
     public override void Initialize()
@@ -32,12 +37,12 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow();
             desktop.Exit += Desktop_Exit;
             InitializeTrayIcon(desktop);
+            StartPipeListener();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
             singleViewPlatform.MainView = new MainView();
         }
-
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -50,6 +55,43 @@ public partial class App : Application
         }
     }
 
+    private async void StartPipeListener()
+    {
+        _pipeCts = new CancellationTokenSource();
+        try
+        {
+            while (!_pipeCts.IsCancellationRequested)
+            {
+                // 创建命名管道服务端
+                using var server = new NamedPipeServerStream("NHLauncher_SingleInstance_Pipe", PipeDirection.In);
+                await server.WaitForConnectionAsync(_pipeCts.Token);
+
+                using var reader = new StreamReader(server);
+                var message = await reader.ReadToEndAsync();
+
+                if (message == "WAKEUP")
+                {
+                    // 关键：切换回 UI 线程执行显示逻辑，彻底解决透明框
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                        {
+                            var win = desktop.MainWindow;
+                            if (win != null)
+                            {
+                                win.Show();
+                                win.Activate();
+                                win.WindowState = WindowState.Normal;
+                                // 强制触发一次重绘
+                                win.InvalidateVisual();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        catch { /* 忽略退出时的异常 */ }
+    }
     private void InitializeTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
     {
         if (_isTrayIconInitialized) return; // 防止重复初始化
