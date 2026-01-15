@@ -308,7 +308,7 @@ namespace LauncherPacker
 
         private void RemoteURLText_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            CurrentProject.ProjectRemoteUrl = RemoteURLText.Text;
+            CurrentProject.ProjectRemoteUrl = RemoteURLText.Text.Replace('\\','/');
         }
 
         private async void Upload(object sender, RoutedEventArgs e)
@@ -339,9 +339,9 @@ namespace LauncherPacker
                 var filesToUpload = Directory.GetFiles(CurrentProject.ProjectPath!, "*.*", SearchOption.AllDirectories)
                     .Where(f =>
                     {
-                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath!, f).Replace("\\", "___");
+                        string relPath = Path.GetRelativePath(CurrentProject.ProjectPath!, f).Replace("\\", "___").Replace("/", "___");
                         return Path.GetFileName(f).Equals("manifest.json", System.StringComparison.OrdinalIgnoreCase) ||
-                               differ.Any(d => d.Path.Replace("\\", "___") == relPath);
+                               differ.Any(d => d.Path.Replace("\\", "___").Replace("/","___") == relPath);
                     })
                     .ToList();
 
