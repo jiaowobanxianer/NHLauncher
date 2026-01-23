@@ -1,19 +1,24 @@
-using Avalonia;
+ï»¿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using NHLauncher.Other;
 using NHLauncher.ViewModels;
 using NHLauncher.Views;
 using System;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
+using System.Threading;
 namespace NHLauncher;
 
 public partial class App : Application
 {
+    private CancellationTokenSource? _pipeCts;
     private bool _isTrayIconInitialized = false;
     private TrayIcon? _trayIcon;
     public override void Initialize()
@@ -32,12 +37,12 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow();
             desktop.Exit += Desktop_Exit;
             InitializeTrayIcon(desktop);
+            StartPipeListener();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
             singleViewPlatform.MainView = new MainView();
         }
-
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -50,12 +55,49 @@ public partial class App : Application
         }
     }
 
+    private async void StartPipeListener()
+    {
+        _pipeCts = new CancellationTokenSource();
+        try
+        {
+            while (!_pipeCts.IsCancellationRequested)
+            {
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                using var server = new NamedPipeServerStream("NHLauncher_SingleInstance_Pipe", PipeDirection.In);
+                await server.WaitForConnectionAsync(_pipeCts.Token);
+
+                using var reader = new StreamReader(server);
+                var message = await reader.ReadToEndAsync();
+
+                if (message == "WAKEUP")
+                {
+                    // ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ UI ï¿½ß³ï¿½Ö´ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                        {
+                            var win = desktop.MainWindow;
+                            if (win != null)
+                            {
+                                win.Show();
+                                win.Activate();
+                                win.WindowState = WindowState.Normal;
+                                // Ç¿ï¿½Æ´ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ø»ï¿½
+                                win.InvalidateVisual();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        catch { /* ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½Ê±ï¿½ï¿½ï¿½ì³£ */ }
+    }
     private void InitializeTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
     {
-        if (_isTrayIconInitialized) return; // ·ÀÖ¹ÖØ¸´³õÊ¼»¯
+        if (_isTrayIconInitialized) return; // ï¿½ï¿½Ö¹ï¿½Ø¸ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
         _trayIcon = new TrayIcon
         {
-            Icon = new WindowIcon(ImageHelper.LoadAssetStreamFromResource("xrf.ico")), // Â·¾¶ÒªÈ·ÈÏ
+            Icon = new WindowIcon(ImageHelper.LoadAssetStreamFromResource("xrf.ico")), // Â·ï¿½ï¿½ÒªÈ·ï¿½ï¿½
             ToolTipText = "NHLauncher",
             IsVisible = true,
         };
@@ -78,7 +120,7 @@ public partial class App : Application
 
         _trayIcon.Menu = menu;
 
-        // ¿ÉÑ¡£ºÖ§³Öµ¥»÷ÍÐÅÌÍ¼±ê£¨×¢Òâ macOS ÉÏ¿ÉÄÜ²»´¥·¢ Clicked£©
+        // ï¿½ï¿½Ñ¡ï¿½ï¿½Ö§ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ê£¨×¢ï¿½ï¿½ macOS ï¿½Ï¿ï¿½ï¿½Ü²ï¿½ï¿½ï¿½ï¿½ï¿½ Clickedï¿½ï¿½
         _trayIcon.Clicked += (s, e) =>
         {
             desktop?.MainWindow?.Show();
