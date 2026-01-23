@@ -30,6 +30,7 @@ namespace NHLauncher.Updater
                     var destFileDir = Path.GetDirectoryName(destPath);
                     if (destPath.Contains("Games")) continue; //跳过Games文件夹
                     if (destPath.EndsWith("update_error.log")) continue; //跳过日志文件
+                    if (destPath.EndsWith("setting.json")) continue; //跳过设置文件
                     if (!Directory.Exists(destFileDir))
                     {
                         Directory.CreateDirectory(destFileDir!);
