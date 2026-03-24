@@ -16,12 +16,13 @@ namespace LauncherPakcerUploadReceiver
             // Add services to the container.
             builder.WebHost.ConfigureKestrel(options =>
             {
-                // ÔÊĞí×î´óÇëÇóÌå 2GB
+                // å…è®¸æœ€å¤§è¯·æ±‚ä½“ 2GB
                 options.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024;
             });
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var serverVersion = new MySqlServerVersion(new Version(5, 7, 44));
             builder.Services.AddDbContext<LauncherDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                options.UseMySql(connectionString, serverVersion));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -62,7 +63,7 @@ namespace LauncherPakcerUploadReceiver
         }
     }
 }
-//Nginx ÅäÖÃÊ¾Àı£º
+//Nginx é…ç½®ç¤ºä¾‹ï¼š
 //client_max_body_size 2000M;
 
 //location / {
@@ -76,7 +77,7 @@ namespace LauncherPakcerUploadReceiver
 //}
 
 
-//Systemd ·şÎñÊ¾Àı£º
+//Systemd æœåŠ¡ç¤ºä¾‹ï¼š
 //[Unit]
 //Description = LauncherPakcer Upload API
 //After=network.target

@@ -12,7 +12,7 @@ namespace LauncherPakcerUploadReceiver
             var optionsBuilder = new DbContextOptionsBuilder<LauncherDbContext>();
 
             // 临时使用 SQLite 文件，本地可生成迁移
-            optionsBuilder.UseSqlite("Data Source=design_time.db");
+            //optionsBuilder.UseSqlite("Data Source=design_time.db");
 
             return new LauncherDbContext(optionsBuilder.Options);
         }

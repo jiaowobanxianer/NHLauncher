@@ -3,6 +3,7 @@ using System;
 using LauncherPakcerUploadReceiver.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -11,56 +12,72 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LauncherPackerUploadReceiver.Migrations
 {
     [DbContext(typeof(LauncherDbContext))]
-    [Migration("20251110054729_Init")]
-    partial class Init
+    [Migration("20260324064321_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.25")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.ProjectAccess", b =>
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("Launcher.Shared.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsFreeAccess")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ProjectName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(255)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("TargetPath")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(500)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ProjectAccesses");
+                    b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.UserAccount", b =>
+            modelBuilder.Entity("Launcher.Shared.UserAccount", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessibleProjectIds")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
@@ -71,21 +88,23 @@ namespace LauncherPackerUploadReceiver.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.UserSession", b =>
+            modelBuilder.Entity("Launcher.Shared.UserSession", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ExpireUtc")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -94,20 +113,9 @@ namespace LauncherPackerUploadReceiver.Migrations
                     b.ToTable("UserSessions");
                 });
 
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.ProjectAccess", b =>
+            modelBuilder.Entity("Launcher.Shared.UserSession", b =>
                 {
-                    b.HasOne("LauncherPakcerUploadReceiver.Data.UserAccount", "User")
-                        .WithMany("Projects")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.UserSession", b =>
-                {
-                    b.HasOne("LauncherPakcerUploadReceiver.Data.UserAccount", "User")
+                    b.HasOne("Launcher.Shared.UserAccount", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -116,10 +124,8 @@ namespace LauncherPackerUploadReceiver.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LauncherPakcerUploadReceiver.Data.UserAccount", b =>
+            modelBuilder.Entity("Launcher.Shared.UserAccount", b =>
                 {
-                    b.Navigation("Projects");
-
                     b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
