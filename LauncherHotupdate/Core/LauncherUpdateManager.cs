@@ -104,7 +104,7 @@ namespace LauncherHotupdate.Core
         {
             var authData = LoadAuthData();
             if (!string.IsNullOrEmpty(authData?.Token))
-                SetAuthCookie(authData.Token);
+                UpdateAuthCookie(authData.Token);
 
             try
             {
@@ -137,7 +137,7 @@ namespace LauncherHotupdate.Core
             var authData = LoadAuthData();
             if (string.IsNullOrEmpty(authData?.Token)) return (false, null);
 
-            SetAuthCookie(authData.Token);
+            UpdateAuthCookie(authData.Token);
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -153,7 +153,7 @@ namespace LauncherHotupdate.Core
             var authData = LoadAuthData();
             if (string.IsNullOrEmpty(authData?.Token)) return ("未登录或登录信息丢失", null);
 
-            SetAuthCookie(authData.Token);
+            UpdateAuthCookie(authData.Token);
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -223,13 +223,33 @@ namespace LauncherHotupdate.Core
                 form.Add(new StringContent(value), name);
             return form;
         }
-
-        private void SetAuthCookie(string token)
+        [Obsolete]
+        private void SetAuthCookie(string token) => UpdateAuthCookie(token);
+        private void UpdateAuthCookie(string token)
         {
+            // 1. 清理旧 Header 防止干扰（虽然不推荐混用，但为了兼容性先清空）
             _httpClient.DefaultRequestHeaders.Remove("Cookie");
-            _httpClient.DefaultRequestHeaders.Add("Cookie", $"LauncherAuth={token}");
-        }
 
+            // 2. 更新 CookieContainer
+            var uri = new Uri(_endpoint.Scheme + "://" + _endpoint.Host);
+
+            // 清除容器中现有的旧 Cookie
+            var existingCookies = _cookieContainer.GetCookies(uri);
+            foreach (Cookie co in existingCookies)
+            {
+                if (co.Name == "LauncherAuth") co.Expired = true;
+            }
+
+            // 如果 token 不为空，则注入新的
+            if (!string.IsNullOrEmpty(token))
+            {
+                _cookieContainer.Add(new Cookie("LauncherAuth", token)
+                {
+                    Domain = _endpoint.Host,
+                    Path = "/"
+                });
+            }
+        }
         private string? GetCookieFromContainer()
         {
             try
