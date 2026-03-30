@@ -39,7 +39,7 @@ namespace LauncherPacker
             CommandBindings.Add(new CommandBinding(SaveCommand, SaveProject));
 
             Change2Upload(null, null);
-            
+
         }
 
         #region 文件夹与项目操作
@@ -308,16 +308,18 @@ namespace LauncherPacker
 
         private void RemoteURLText_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            CurrentProject.ProjectRemoteUrl = RemoteURLText.Text.Replace('\\','/');
+            CurrentProject.ProjectRemoteUrl = RemoteURLText.Text.Replace('\\', '/');
         }
 
         private async void Upload(object sender, RoutedEventArgs e)
         {
             if (!ValidateUpload(out string manifestPath)) return;
-            if(string.IsNullOrEmpty(CurrentProject.ProjectRemoteUrl) || string.IsNullOrEmpty(CurrentProject.ProjectPath))
+            if (string.IsNullOrEmpty(CurrentProject.ProjectRemoteUrl) || string.IsNullOrEmpty(CurrentProject.ProjectPath))
             {
                 MessageBox.Show("请输入远程路径和项目路径", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
-            }    
+                return;
+            }
+
             string currentFile = "";
             try
             {
@@ -336,66 +338,132 @@ namespace LauncherPacker
 
                 UploadButton.IsEnabled = false;
 
+                // 1. 筛选待上传文件
                 var filesToUpload = Directory.GetFiles(CurrentProject.ProjectPath!, "*.*", SearchOption.AllDirectories)
                     .Where(f =>
                     {
                         string relPath = Path.GetRelativePath(CurrentProject.ProjectPath!, f).Replace("\\", "___").Replace("/", "___");
-                        return Path.GetFileName(f).Equals("manifest.json", System.StringComparison.OrdinalIgnoreCase) ||
-                               differ.Any(d => d.Path.Replace("\\", "___").Replace("/","___") == relPath);
-                    })
-                    .ToList();
+                        return Path.GetFileName(f).Equals("manifest.json", StringComparison.OrdinalIgnoreCase) ||
+                               differ.Any(d => d.Path.Replace("\\", "___").Replace("/", "___") == relPath);
+                    }).ToList();
 
-                int totalFiles = filesToUpload.Count, currentFileIndex = 0;
+                // 2. 初始化全局统计变量
+                int totalFiles = filesToUpload.Count;
+                long totalBytes = filesToUpload.Sum(f => new FileInfo(f).Length);
+                long totalUploadedBytes = 0; // 已完成批次的字节总数
+                int completedFilesCount = 0; // 已完成批次的文件总数
 
+                // 3. 按批次上传
                 for (int batchStart = 0; batchStart < filesToUpload.Count; batchStart += batchSize)
                 {
                     var batchFiles = filesToUpload.Skip(batchStart).Take(batchSize).ToList();
+
+                    // 预存当前批次内每个文件的长度，用于回调中精准计算文件完成数
+                    var batchFileLengths = batchFiles.ToDictionary(
+                        f => Path.GetRelativePath(CurrentProject.ProjectPath!, f).Replace("\\", "___"),
+                        f => new FileInfo(f).Length
+                    );
+
                     using var content = new MultipartFormDataContent();
                     content.Add(new StringContent(apiKey), "apiKey");
                     content.Add(new StringContent(CurrentProject.ProjectRemoteUrl!), "targetPath");
                     content.Add(new StringContent("Upload"), "cmd");
                     content.Add(new StringContent((IsFreeCheckBox.IsChecked ?? false) ? "" : "123"), "isFree");
 
-                    using var fileStreams = new DisposableList<FileStream>();
+                    // 追踪当前批次内部各文件的实时进度
+                    var fileUploadProgresses = new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
+
                     foreach (var file in batchFiles)
                     {
                         string relativePath = Path.GetRelativePath(CurrentProject.ProjectPath!, file).Replace("\\", "___");
                         currentFile = file;
-                        var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                        fileStreams.Add(fs);
 
-                        var fileContent = new StreamContent(fs);
-                        fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = "files", FileName = relativePath };
-                        content.Add(fileContent);
+                        var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
+                        // 使用自定义 ProgressStreamContent 实现流式监听
+                        var fileStreamContent = new ProgressStreamContent(fs, (args) =>
+                        {
+                            // 更新当前文件进度
+                            fileUploadProgresses[relativePath] = args.Transferred;
+
+                            // 计算当前 batch 的总已读
+                            long currentBatchRead = fileUploadProgresses.Values.Sum();
+                            long currentTotalTransferred = totalUploadedBytes + currentBatchRead;
+
+                            // 精准计算文件完成数：当前 batch 中已读完的文件 + 历史已完成 batch
+                            int currentBatchCompleted = fileUploadProgresses.Count(kvp =>
+                                batchFileLengths.ContainsKey(kvp.Key) && kvp.Value >= batchFileLengths[kvp.Key]);
+
+                            int displayFileCount = Math.Min(completedFilesCount + currentBatchCompleted, totalFiles);
+
+                            // 计算百分比
+                            var percent = (float)currentTotalTransferred / totalBytes * 100f;
+                            if (percent > 100) percent = 100;
+
+                            // 更新 UI
+                            string statusText = $"总进度：{MathF.Ceiling(percent)}% | " +
+                                               $"文件：{displayFileCount}/{totalFiles} | " +
+                                               $"大小：{FormatBytes(currentTotalTransferred)} / {FormatBytes(totalBytes)}";
+
+                            UpdateProgressUI(statusText);
+                        });
+
+                        fileStreamContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data")
+                        {
+                            Name = "files",
+                            FileName = relativePath
+                        };
+                        content.Add(fileStreamContent);
                     }
 
+                    // 执行上传
                     var response = await httpClient.PostAsync(hotUpdateApi, content);
-                    string respMsg = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
                     {
+                        string respMsg = await response.Content.ReadAsStringAsync();
                         MessageBox.Show($"文件上传失败: {response.ReasonPhrase}\n{respMsg}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
-                    currentFileIndex += batchFiles.Count;
-                    var percent = MathF.Ceiling((float)currentFileIndex / totalFiles * 100);
-                    progressBar.Value = percent;
-                    ProgressTextBlock.Text = $"上传进度：{percent}%      文件:{currentFileIndex}/{totalFiles}";
+                    // 批次完成，更新基数
+                    totalUploadedBytes += batchFiles.Sum(f => new FileInfo(f).Length);
+                    completedFilesCount += batchFiles.Count;
                 }
 
                 MessageBox.Show($"上传完成，总文件 {filesToUpload.Count} 个，差异文件 {differ.Count} 个。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                ShowError($"上传过程中发生错误，文件{currentFile}处出错", ex);
+                ShowError($"上传过程中发生错误，当前处理：{currentFile}", ex);
             }
             finally
             {
                 UploadButton.IsEnabled = true;
             }
         }
-
+        private void UpdateProgressUI(string text)
+        {
+            // 如果不在 UI 线程，则调度到 UI 线程执行
+            if (!ProgressTextBlock.Dispatcher.CheckAccess())
+            {
+                ProgressTextBlock.Dispatcher.BeginInvoke(new Action(() => UpdateProgressUI(text)));
+                return;
+            }
+            ProgressTextBlock.Text = text;
+        }
+        private string FormatBytes(long bytes)
+        {
+            string[] Suffix = { "B", "KB", "MB", "GB", "TB" };
+            int i;
+            double dblSByte = bytes;
+            for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024)
+            {
+                dblSByte = bytes / 1024.0;
+            }
+            // 保留两位小数，如果 i=0(B) 则不保留小数
+            return $"{(i == 0 ? dblSByte : dblSByte.ToString("0.00"))} {Suffix[i]}";
+        }
         private bool ValidateUpload(out string manifestPath)
         {
             manifestPath = Path.Combine(CurrentProject.ProjectPath!, "manifest.json");
@@ -451,5 +519,10 @@ namespace LauncherPacker
         {
             CurrentProject.IsFree = IsFreeCheckBox.IsChecked ?? false;
         }
+    }
+    public class ProgressArgs
+    {
+        public long Transferred { get; set; } // 已传输字节
+        public long Total { get; set; }       // 总字节
     }
 }
